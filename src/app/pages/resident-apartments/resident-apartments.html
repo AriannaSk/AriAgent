@@ -1,0 +1,91 @@
+<div class="page-content resident-apartment-detail-page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">My Apartment</h2>
+      <p class="page-subtitle">View your apartment information</p>
+    </div>
+
+    <button class="back-btn" (click)="goBack()">
+      <i class="bi bi-arrow-left-short"></i>
+      Back
+    </button>
+  </div>
+
+  <div *ngIf="loading()" class="state-card">
+    Loading apartment...
+  </div>
+
+  <div *ngIf="error()" class="message-card error-message">
+    {{ error() }}
+  </div>
+
+  <ng-container *ngIf="!loading() && apartment() as ap">
+    <div class="apartment-card">
+      <div class="apartment-card-header">
+        <div class="apartment-icon">
+          <i class="bi bi-building"></i>
+        </div>
+
+        <div>
+          <h3 class="apartment-title">Apartment #{{ ap.numurs }}</h3>
+          <p class="apartment-subtitle">Detailed apartment information</p>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-box">
+          <span class="info-label">Floor</span>
+          <span class="info-value">{{ ap.stavs }}</span>
+        </div>
+
+        <div class="info-box">
+          <span class="info-label">Rooms</span>
+          <span class="info-value">{{ ap.istabuSkaits }}</span>
+        </div>
+
+        <div class="info-box">
+          <span class="info-label">Full area</span>
+          <span class="info-value">
+            {{ ap.pilnaPlatiba != null ? (ap.pilnaPlatiba + ' m²') : '—' }}
+          </span>
+        </div>
+
+        <div class="info-box">
+          <span class="info-label">Living area</span>
+          <span class="info-value">
+            {{ livingAreaText(ap) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="address-section">
+        <h4 class="section-title">Address</h4>
+        <div class="address-box">
+          <i class="bi bi-geo-alt-fill"></i>
+          <span>{{ addressText(ap) }}</span>
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+
+      <div class="residents-section">
+        <h4 class="section-title">Residents</h4>
+
+        <div *ngIf="ap.iedzivotaji?.length; else noResidents" class="residents-list">
+          <div *ngFor="let r of ap.iedzivotaji" class="resident-chip">
+            <i class="bi bi-person-circle"></i>
+            <span>{{ r.vards }} {{ r.uzvards }}</span>
+          </div>
+        </div>
+
+        <ng-template #noResidents>
+          <div class="empty-state">
+            No residents assigned to this apartment.
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -1,0 +1,153 @@
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+.login-page{
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(140deg,#4b5563,#464747);
+font-family:'Segoe UI',sans-serif;
+}
+
+.login-card{
+display:flex;
+width:900px;
+height:500px;
+border-radius:16px;
+overflow:hidden;
+box-shadow:0 25px 60px rgba(235, 235, 245, 0.4);
+}
+
+/* Левая часть */
+
+.login-left{
+flex:1;
+background-image:url("https://images.unsplash.com/photo-1707460635001-c20c72652f08?q=80&w=736&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+background-size:cover;
+background-position:center;
+position:relative;
+display:flex;
+align-items:flex-end;
+}
+
+/* затемнение */
+
+.overlay{
+background:linear-gradient(
+to top,
+rgba(0,0,0,0.8),
+rgba(0,0,0,0.3)
+);
+width:100%;
+padding:40px;
+color:white;
+}
+
+/* бренд */
+
+.brand{
+font-size:38px;
+font-weight:750;
+margin-bottom:10px;
+letter-spacing:1px;
+color:#ffffff;
+}
+
+.tagline{
+font-size:18px;
+opacity:0.9;
+line-height:1.4;
+}
+
+/* правая часть */
+
+.login-right{
+flex:1;
+background:#253c4e;
+padding:60px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+}
+
+/* заголовок */
+
+.login-right h2{
+color:white;
+font-size:31px;
+margin-bottom:6px;
+}
+
+.subtitle{
+color:#9ca3af;
+margin-bottom:30px;
+}
+
+/* input */
+
+.login-input{
+width:100%;
+padding:14px;
+margin-bottom:16px;
+border:none;
+border-radius:8px;
+background:#1f2937;
+color:white;
+font-size:14px;
+outline:none;
+transition:all 0.2s ease;
+}
+
+.login-input::placeholder{
+color:#6b7280;
+}
+
+.login-input:focus{
+border:1px solid #6366f1;
+box-shadow:0 0 0 2px rgba(99,102,241,0.2);
+}
+
+/* кнопка */
+
+.login-button{
+margin-top:10px;
+padding:14px;
+border:none;
+border-radius:8px;
+background:#6366f1;
+color:white;
+font-size:16px;
+font-weight:500;
+cursor:pointer;
+transition:all 0.25s ease;
+}
+
+.login-button:hover{
+background:#4f46e5;
+transform:translateY(-2px);
+box-shadow:0 12px 30px rgba(0,0,0,0.35);
+}
+
+
+
+@media (max-width:900px){
+
+.login-card{
+flex-direction:column;
+width:90%;
+height:auto;
+}
+
+.login-left{
+height:220px;
+}
+
+.login-right{
+padding:40px;
+}
+
+}

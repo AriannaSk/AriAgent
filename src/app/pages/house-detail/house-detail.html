@@ -1,0 +1,130 @@
+<div *ngIf="loading()" class="container house-detail-page mt-5">
+  <div class="text-muted">Loading house...</div>
+</div>
+
+<div *ngIf="!loading() && house() as h" class="container house-detail-page mt-5">
+
+  <!-- PAGE HEADER -->
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <div class="breadcrumb-line mb-2">
+        <button type="button" class="breadcrumb-btn" (click)="goBack()">
+          ← Back to houses
+        </button>
+      </div>
+
+      <h2 class="page-title mb-1">
+        {{ h.iela }} {{ h.numurs }}
+      </h2>
+
+      <p class="page-subtitle mb-1">
+        {{ h.pilseta }}, {{ h.valsts }} · {{ h.pastaIndekss }}
+      </p>
+
+      <div class="house-id">
+        House ID: {{ h.id }}
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+      <button
+        *ngIf="auth.isManager()"
+        class="btn btn-primary btn-sm"
+        (click)="addApartment()">
+        + Add Apartment
+      </button>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary-row mb-3">
+    <div class="summary-item">
+      <span class="summary-label">Apartments</span>
+      <span class="summary-value">{{ apartments().length }}</span>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="error()" class="status-box text-danger mb-3">
+    {{ error() }}
+  </div>
+
+  <!-- CARD -->
+  <div class="card apartments-card">
+    <div class="card-header apartments-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h5 class="mb-0">Apartments</h5>
+        <div class="header-subtext">
+          View and manage apartments in this house
+        </div>
+      </div>
+
+      <button
+        *ngIf="auth.isManager()"
+        class="btn btn-primary btn-sm"
+        (click)="addApartment()">
+        + Add Apartment
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="apartments-table">
+
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Residents</th>
+            <th>Floor</th>
+            <th>Rooms</th>
+            <th>Area</th>
+            <th class="text-end">Action</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let a of apartments()">
+            <td class="fw-semibold">
+              {{ a.numurs }}
+            </td>
+
+            <td>
+              {{ a.iedzivotajuSkaits }}
+            </td>
+
+            <td>
+              {{ a.stavs }}
+            </td>
+
+            <td>
+              {{ a.istabuSkaits }}
+            </td>
+
+            <td>
+              {{ a.dzivojamaPlatiba }} m²
+            </td>
+
+            <td class="text-end">
+              <button
+                class="btn btn-outline-primary btn-sm"
+                (click)="openApartment(a.id)">
+                Open
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="apartments().length === 0">
+            <td colspan="6" class="text-center text-muted py-4">
+              No apartments found
+            </td>
+          </tr>
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<div *ngIf="!loading() && !house()" class="container house-detail-page mt-5">
+  <div class="text-muted">House not found.</div>
+</div>

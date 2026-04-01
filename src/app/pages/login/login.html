@@ -1,0 +1,66 @@
+<div class="login-page">
+
+  <div class="login-card">
+
+    <!-- Левая часть -->
+    <div class="login-left">
+
+      <div class="overlay">
+
+        <h1 class="brand">AriAgent</h1>
+
+        <p class="tagline">
+          Managing houses<br>
+          & apartments
+        </p>
+
+      </div>
+
+    </div>
+
+    <!-- Правая часть -->
+    <div class="login-right">
+
+      <h2>Welcome back</h2>
+      <p class="subtitle">Login to your account</p>
+
+      <!-- ERROR -->
+      <div *ngIf="error" class="login-error">
+        {{ error }}
+      </div>
+
+      <form (ngSubmit)="login()">
+
+        <input
+          [(ngModel)]="email"
+          name="email"
+          type="email"
+          class="login-input"
+          placeholder="Email"
+          required
+        >
+
+        <input
+          [(ngModel)]="password"
+          name="password"
+          type="password"
+          class="login-input"
+          placeholder="Password"
+          required
+        >
+
+        <button
+          class="login-button"
+          type="submit"
+          [disabled]="loading"
+        >
+          {{ loading ? 'Logging in...' : 'Login' }}
+        </button>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>

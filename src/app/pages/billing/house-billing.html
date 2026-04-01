@@ -1,0 +1,498 @@
+<div class="container mt-5 billing-page">
+
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold mb-1 page-title">Invoices</h2>
+      <div class="text-secondary">
+        {{ houseName() || 'Select a house' }}
+      </div>
+    </div>
+
+    <div class="d-flex align-items-end gap-2 flex-wrap">
+
+      <div>
+        <label class="small text-secondary mb-1 d-block">House</label>
+        <select
+          class="form-control form-control-sm billing-select"
+          [ngModel]="selectedHouseId()"
+          (ngModelChange)="selectedHouseId.set($event); onHouseChange()">
+          <option value="">Select house</option>
+          <option *ngFor="let h of houses()" [value]="h.id">
+            {{ h.iela }} {{ h.numurs }}, {{ h.pilseta }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="small text-secondary mb-1 d-block">Apartment</label>
+        <select
+          class="form-control form-control-sm billing-select"
+          [ngModel]="selectedApartmentId()"
+          (ngModelChange)="selectedApartmentId.set($event); onApartmentChange()"
+          [disabled]="!selectedHouseId()">
+          <option value="">All apartments</option>
+          <option *ngFor="let a of apartments()" [value]="a.id">
+            Apartment #{{ a.numurs }}
+          </option>
+        </select>
+      </div>
+
+      <div>
+        <label class="small text-secondary mb-1 d-block">Period</label>
+        <input
+          type="month"
+          class="form-control form-control-sm period-input"
+          [value]="selectedPeriod()"
+          (input)="selectedPeriod.set($any($event.target).value); onPeriodChange()">
+      </div>
+
+      <div>
+        <button
+          class="btn btn-primary btn-sm"
+          (click)="generateAllInvoices()"
+          [disabled]="!selectedHouseId() || filteredApartments().length === 0 || isGeneratingAll()">
+          {{ isGeneratingAll() ? 'Generating...' : 'Generate all invoices' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <div *ngIf="message()" class="alert alert-info py-2 mb-3">
+    {{ message() }}
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="card summary-card h-100">
+        <div class="card-body">
+          <div class="summary-label">House apartments</div>
+          <div class="summary-value">{{ filteredApartments().length }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card summary-card h-100">
+        <div class="card-body">
+          <div class="summary-label">Generated</div>
+          <div class="summary-value text-success">
+            {{ generatedCount() }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card summary-card h-100">
+        <div class="card-body">
+          <div class="summary-label">Missing</div>
+          <div class="summary-value text-danger">
+            {{ missingCount() }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="card summary-card h-100">
+        <div class="card-body">
+          <div class="summary-label">Total</div>
+          <div class="summary-value text-primary">
+            {{ total() | number:'1.2-2' }} €
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="card-title mb-0">Apartments billing</h5>
+      </div>
+
+      <div *ngIf="!selectedHouseId()" class="text-secondary">
+        Select a house to view billing data
+      </div>
+
+      <div *ngIf="selectedHouseId() && filteredApartments().length === 0" class="text-secondary">
+        No apartments in this house
+      </div>
+
+      <div class="table-responsive" *ngIf="selectedHouseId() && filteredApartments().length > 0">
+        <table class="table table-hover align-middle billing-table">
+
+          <thead>
+            <tr>
+              <th>Apartment</th>
+              <th>Floor</th>
+              <th>Area</th>
+              <th>Residents</th>
+              <th>Water</th>
+              <th>Electricity</th>
+              <th>Invoice</th>
+              <th>Status</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let a of filteredApartments()">
+
+              <td>
+                <div class="fw-semibold">
+                  #{{ a.numurs }}
+                </div>
+                <div class="small text-secondary">
+                  {{ houseName() }}
+                </div>
+              </td>
+
+              <td>{{ a.stavs }}</td>
+              <td>{{ a.pilnaPlatiba }} m²</td>
+              <td>{{ getBillingResidents(a.id) }}</td>
+              <td>{{ getBillingWater(a.id) }} m³</td>
+              <td>{{ getBillingElectricity(a.id) }} kWh</td>
+
+              <td>
+                <ng-container *ngIf="getInvoiceForApartment(a.id) as inv; else noInvoice">
+                  <div class="fw-semibold text-success">
+                    {{ inv.total | number:'1.2-2' }} €
+                  </div>
+                  <div class="small text-secondary">
+                    {{ inv.period }}
+                  </div>
+
+                  <div *ngIf="hasTotalMismatch(a.id)" class="small text-warning fw-semibold mt-1">
+                    Calculated: {{ calculateInvoiceTotalForApartment(a.id) | number:'1.2-2' }} €
+                  </div>
+                </ng-container>
+
+                <ng-template #noInvoice>
+                  <span class="text-secondary">—</span>
+                </ng-template>
+              </td>
+
+              <td>
+                <div class="d-flex flex-column gap-1 align-items-start">
+                  <span
+                    *ngIf="hasBillingInput(a.id)"
+                    class="badge bg-info-subtle text-info-emphasis border status-badge">
+                    Data entered
+                  </span>
+
+                  <ng-container *ngIf="getInvoiceForApartment(a.id); else missingStatus">
+                    <span class="badge bg-success-subtle text-success border status-badge">
+                      Generated
+                    </span>
+                  </ng-container>
+
+                  <ng-template #missingStatus>
+                    <span class="badge bg-danger-subtle text-danger border status-badge">
+                      No invoice
+                    </span>
+                  </ng-template>
+
+                  <span
+                    *ngIf="hasTotalMismatch(a.id)"
+                    class="badge bg-warning-subtle text-warning-emphasis border status-badge">
+                    Total mismatch
+                  </span>
+                </div>
+              </td>
+
+              <td class="text-end">
+                <div class="d-flex justify-content-end gap-2 flex-wrap">
+
+                  <button
+                    class="btn btn-outline-secondary btn-sm"
+                    (click)="openBillingInput(a.id)">
+                    {{ hasBillingInput(a.id) ? 'Edit data' : 'Enter data' }}
+                  </button>
+
+                  <button
+                    class="btn btn-outline-primary btn-sm"
+                    *ngIf="getInvoiceForApartment(a.id) as inv"
+                    (click)="inv.id && openInvoice(inv.id)">
+                    Open
+                  </button>
+
+                  <button
+                    class="btn btn-success btn-sm"
+                    *ngIf="getInvoiceForApartment(a.id)"
+                    disabled>
+                    Generated
+                  </button>
+
+                  <button
+                    class="btn btn-primary btn-sm"
+                    *ngIf="!getInvoiceForApartment(a.id)"
+                    (click)="generateInvoiceForApartment(a.id)"
+                    [disabled]="!canGenerateInvoice(a.id)">
+                    Generate
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+
+      <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h5 class="card-title mb-0">Services / Tariffs</h5>
+
+        <button
+          class="btn btn-success btn-sm"
+          (click)="addService()">
+          + Add Service
+        </button>
+      </div>
+
+      <div *ngIf="services().length === 0" class="text-secondary">
+        No services added
+      </div>
+
+      <div class="table-responsive" *ngIf="services().length > 0">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Tariff</th>
+              <th>Tax</th>
+              <th>Formula</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let s of services()">
+              <td><strong>{{ s.nosaukums }}</strong></td>
+              <td>{{ s.tarifs | number:'1.2-2' }} €</td>
+              <td>{{ s.nodoklis }} %</td>
+              <td>{{ getFormulaLabel(s.formula) }}</td>
+              <td class="text-end">
+                <button
+                  class="btn btn-outline-primary btn-sm me-2"
+                  (click)="editService(s)">
+                  Edit
+                </button>
+
+                <button
+                  class="btn btn-outline-danger btn-sm"
+                  (click)="deleteService(s)">
+                  Delete
+                </button>
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="card border-primary total-card">
+    <div class="card-body d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">Total house billing</h5>
+      <h5 class="mb-0 text-primary fw-bold">
+        {{ total() | number:'1.2-2' }} €
+      </h5>
+    </div>
+  </div>
+
+</div>
+
+<div
+  *ngIf="editingBillingInput()"
+  class="edit-modal-overlay"
+  (click)="closeBillingInputModal()">
+
+  <div
+    class="edit-modal"
+    (click)="$event.stopPropagation()">
+
+    <h4 class="mb-3">Billing input</h4>
+
+    <label>Water (m³)</label>
+    <input
+      type="number"
+      min="0"
+      step="0.01"
+      class="form-control mb-2"
+      [(ngModel)]="editingBillingInput()!.waterM3"
+      (input)="validateBillingInputForm()">
+    <div class="validation-text text-danger mb-2" *ngIf="billingInputErrors().waterM3">
+      {{ billingInputErrors().waterM3 }}
+    </div>
+
+    <label>Electricity (kWh)</label>
+    <input
+      type="number"
+      min="0"
+      step="0.01"
+      class="form-control mb-2"
+      [(ngModel)]="editingBillingInput()!.electricityKwh"
+      (input)="validateBillingInputForm()">
+    <div class="validation-text text-danger mb-2" *ngIf="billingInputErrors().electricityKwh">
+      {{ billingInputErrors().electricityKwh }}
+    </div>
+
+    <label>Residents count</label>
+    <input
+      type="number"
+      min="0"
+      step="1"
+      class="form-control mb-2"
+      [(ngModel)]="editingBillingInput()!.residentsCount"
+      (input)="validateBillingInputForm()">
+    <div class="validation-text text-danger mb-2" *ngIf="billingInputErrors().residentsCount">
+      {{ billingInputErrors().residentsCount }}
+    </div>
+
+    <label>Comment</label>
+    <textarea
+      class="form-control mb-3"
+      rows="3"
+      [(ngModel)]="editingBillingInput()!.comment">
+    </textarea>
+
+    <div class="d-flex justify-content-end gap-2">
+      <button
+        class="btn btn-secondary"
+        (click)="closeBillingInputModal()">
+        Cancel
+      </button>
+
+      <button
+        class="btn btn-success"
+        (click)="saveBillingInput()"
+        [disabled]="billingInputFormInvalid()">
+        Save
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div
+  *ngIf="editingService()"
+  class="edit-modal-overlay"
+  (click)="cancelEdit()">
+
+  <div
+    class="edit-modal"
+    (click)="$event.stopPropagation()">
+
+    <h4 class="mb-3">
+      {{ editingService()!.id ? 'Edit Service' : 'Add Service' }}
+    </h4>
+
+    <label>Name</label>
+    <input
+      class="form-control mb-2"
+      [(ngModel)]="editingService()!.nosaukums"
+      (input)="validateServiceForm()">
+    <div class="validation-text text-danger mb-2" *ngIf="serviceErrors().nosaukums">
+      {{ serviceErrors().nosaukums }}
+    </div>
+
+    <label>Tariff</label>
+    <input
+      type="number"
+      min="0"
+      step="0.01"
+      class="form-control mb-2"
+      [(ngModel)]="editingService()!.tarifs"
+      (input)="validateServiceForm()">
+    <div class="validation-text text-danger mb-2" *ngIf="serviceErrors().tarifs">
+      {{ serviceErrors().tarifs }}
+    </div>
+
+    <label>Tax %</label>
+    <input
+      type="number"
+      min="0"
+      max="100"
+      step="0.01"
+      class="form-control mb-2"
+      [(ngModel)]="editingService()!.nodoklis"
+      (input)="validateServiceForm()">
+    <div class="validation-text text-danger mb-2" *ngIf="serviceErrors().nodoklis">
+      {{ serviceErrors().nodoklis }}
+    </div>
+
+    <label>Formula</label>
+    <select
+      class="form-control mb-2 billing-select"
+      [(ngModel)]="editingService()!.formula"
+      (change)="validateServiceForm()">
+      <option *ngFor="let f of availableFormulas" [value]="f.value">
+        {{ f.label }}
+      </option>
+    </select>
+    <div class="validation-text text-danger mb-3" *ngIf="serviceErrors().formula">
+      {{ serviceErrors().formula }}
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+      <button
+        class="btn btn-secondary"
+        (click)="cancelEdit()">
+        Cancel
+      </button>
+
+      <button
+        class="btn btn-success"
+        (click)="saveService()"
+        [disabled]="serviceFormInvalid()">
+        Save
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div
+  *ngIf="showDeleteServiceModal()"
+  class="edit-modal-overlay"
+  (click)="closeDeleteServiceModal()">
+
+  <div
+    class="edit-modal"
+    (click)="$event.stopPropagation()">
+
+    <h4 class="mb-3">Delete service</h4>
+
+    <p class="mb-3">
+      Are you sure you want to delete
+      <strong>{{ selectedServiceForDelete()?.nosaukums || 'this service' }}</strong>?
+    </p>
+
+    <div class="d-flex justify-content-end gap-2">
+      <button
+        class="btn btn-secondary"
+        (click)="closeDeleteServiceModal()">
+        Cancel
+      </button>
+
+      <button
+        class="btn btn-danger"
+        (click)="confirmDeleteService()">
+        Delete
+      </button>
+    </div>
+
+  </div>
+</div>

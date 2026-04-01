@@ -1,0 +1,523 @@
+<div class="container apartments-page mt-5">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold page-title mb-1">
+        {{ auth.isResident() ? 'My Apartments' : 'Apartments' }}
+      </h2>
+      <p class="page-subtitle mb-0">
+        {{ auth.isResident()
+          ? 'View your apartments and residents assigned to them'
+          : 'View all apartments and residents across connected houses' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="row mb-3">
+    <div class="col-lg-7 col-md-8">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input
+          class="form-control search-input"
+          placeholder="Search apartment, house or resident..."
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary-row mb-3" *ngIf="!loading()">
+    <div class="summary-item">
+      <span class="summary-label">Total apartments</span>
+      <span class="summary-value">{{ apartments().length }}</span>
+    </div>
+
+    <div class="summary-item">
+      <span class="summary-label">Shown apartments</span>
+      <span class="summary-value">{{ filteredApartments().length }}</span>
+    </div>
+
+    <div class="summary-item">
+      <span class="summary-label">Total residents</span>
+      <span class="summary-value">{{ getTotalResidents() }}</span>
+    </div>
+  </div>
+
+  <!-- RESULTS INFO -->
+  <div class="results-info mb-3"
+       *ngIf="!loading() && filteredApartments().length > 0">
+    Showing {{ filteredApartments().length }} apartment{{ filteredApartments().length === 1 ? '' : 's' }}
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading()" class="text-muted">
+    Loading apartments...
+  </div>
+
+  <!-- EMPTY -->
+  <div *ngIf="!loading() && filteredApartments().length === 0"
+       class="text-center text-muted mt-5">
+    <h5>No apartments found</h5>
+  </div>
+  
+
+  <!-- GRID -->
+  <div class="row g-4"
+       *ngIf="!loading() && filteredApartments().length > 0">
+
+    <div class="col-md-4"
+         *ngFor="let a of filteredApartments()">
+
+      <div class="card apartment-card">
+        <div class="card-body">
+
+          <!-- HEADER -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title m-0">
+              🏠 Apartment #{{ a.numurs }}
+            </h5>
+
+            <div class="d-flex gap-2" *ngIf="!auth.isResident()">
+              <button class="btn btn-sm btn-outline-primary"
+                      (click)="openEditModal(a)">
+                Edit
+              </button>
+
+              <button class="btn btn-sm btn-outline-danger"
+                      (click)="deleteApartment(a)">
+                Delete
+              </button>
+            </div>
+          </div>
+
+          <!-- HOUSE -->
+          <p class="apartment-house">
+            {{ getHouseName(a) }}
+          </p>
+
+          <!-- INFO -->
+          <div class="apartment-info">
+            <div>Floor: {{ a.stavs }}</div>
+            <div>Rooms: {{ a.istabuSkaits }}</div>
+            <div>Area: {{ a.pilnaPlatiba }} m²</div>
+          </div>
+
+          <hr>
+          <div class="mt-3">
+          <button class="btn btn-sm btn-dark"
+                  (click)="openApartmentDetails(a)">
+            View Bills
+          </button>
+        </div>
+          <!-- RESIDENTS -->
+          <div class="apartment-residents">
+            <div class="fw-semibold mb-1">
+              👥 Residents ({{ getResidentsCount(a) }})
+            </div>
+
+            <div *ngIf="a.iedzivotaji.length > 0">
+              <div *ngFor="let r of a.iedzivotaji" class="resident-item">
+                {{ r.vards }} {{ r.uzvards }}
+              </div>
+            </div>
+
+            <div *ngIf="a.iedzivotaji.length === 0" class="text-muted small">
+              No residents
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" *ngIf="showDeleteModal && !auth.isResident()">
+  <div class="custom-modal">
+
+    <h5>Delete apartment</h5>
+
+    <p>
+      Delete Apartment #{{ selectedApartment?.numurs }}?
+    </p>
+
+    <div class="modal-actions">
+      <button class="btn btn-secondary"
+              (click)="closeDeleteModal()">
+        Cancel
+      </button>
+
+      <button class="btn btn-danger"
+              (click)="confirmDelete()">
+        Delete
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" *ngIf="showEditModal && editingApartment && !auth.isResident()">
+  <div class="custom-modal large-scroll">
+
+    <div *ngIf="editingApartment as ap">
+
+      <div class="card-header">
+        <h5 class="mb-0">Edit Apartment</h5>
+      </div>
+
+      <div class="card-body">
+
+        <form #apartmentForm="ngForm">
+
+          <!-- NUMBER -->
+          <div class="mb-3">
+            <label class="form-label">Number</label>
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="ap.numurs"
+              name="numurs"
+              required
+              min="1"
+              step="1"
+              pattern="^[0-9]+$"
+              #numurs="ngModel"
+              [class.is-invalid]="(numurs.invalid && numurs.touched) || apartmentNumberInvalid(ap)"
+              (keydown)="allowOnlyWholeNumbers($event)"
+              (input)="normalizeIntegerField(ap, 'numurs')"
+              placeholder="Example: 12">
+
+            <div class="text-danger validation-text" *ngIf="numurs.errors?.['required'] && numurs.touched">
+              Apartment number is required
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="!numurs.errors?.['required'] && (numurs.errors?.['min'] || numurs.errors?.['pattern']) && numurs.touched">
+              Apartment number must be a whole number greater than 0
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="apartmentNumberInvalid(ap) && numurs.touched">
+              Apartment number must be a whole number greater than 0
+            </div>
+          </div>
+
+          <!-- FLOOR -->
+          <div class="mb-3">
+            <label class="form-label">Floor</label>
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="ap.stavs"
+              name="stavs"
+              required
+              min="0"
+              step="1"
+              pattern="^[0-9]+$"
+              #stavs="ngModel"
+              [class.is-invalid]="(stavs.invalid && stavs.touched) || floorInvalid(ap)"
+              (keydown)="allowOnlyWholeNumbers($event)"
+              (input)="normalizeIntegerField(ap, 'stavs')"
+              placeholder="Example: 2">
+
+            <div class="text-danger validation-text" *ngIf="stavs.errors?.['required'] && stavs.touched">
+              Floor is required
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="!stavs.errors?.['required'] && (stavs.errors?.['min'] || stavs.errors?.['pattern']) && stavs.touched">
+              Floor must be a whole number 0 or greater
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="floorInvalid(ap) && stavs.touched">
+              Floor must be a whole number 0 or greater
+            </div>
+          </div>
+
+          <!-- ROOMS -->
+          <div class="mb-3">
+            <label class="form-label">Rooms</label>
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="ap.istabuSkaits"
+              name="rooms"
+              required
+              min="1"
+              step="1"
+              pattern="^[0-9]+$"
+              #rooms="ngModel"
+              [class.is-invalid]="(rooms.invalid && rooms.touched) || roomsInvalid(ap)"
+              (keydown)="allowOnlyWholeNumbers($event)"
+              (input)="normalizeIntegerField(ap, 'istabuSkaits')"
+              placeholder="Example: 3">
+
+            <div class="text-danger validation-text" *ngIf="rooms.errors?.['required'] && rooms.touched">
+              Rooms are required
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="!rooms.errors?.['required'] && (rooms.errors?.['min'] || rooms.errors?.['pattern']) && rooms.touched">
+              Rooms must be a whole number at least 1
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="roomsInvalid(ap) && rooms.touched">
+              Rooms must be a whole number at least 1
+            </div>
+          </div>
+
+          <!-- FULL AREA -->
+          <div class="mb-3">
+            <label class="form-label">Full Area</label>
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="ap.pilnaPlatiba"
+              name="pilnaPlatiba"
+              required
+              min="0.01"
+              step="0.01"
+              #pilnaPlatiba="ngModel"
+              [class.is-invalid]="(pilnaPlatiba.invalid && pilnaPlatiba.touched) || fullAreaInvalid(ap) || areaRelationInvalid(ap)"
+              (input)="normalizeDecimalField(ap, 'pilnaPlatiba')"
+              placeholder="Example: 75.50">
+
+            <div class="text-danger validation-text" *ngIf="pilnaPlatiba.errors?.['required'] && pilnaPlatiba.touched">
+              Full area is required
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="!pilnaPlatiba.errors?.['required'] && pilnaPlatiba.errors?.['min'] && pilnaPlatiba.touched">
+              Full area must be greater than 0
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="fullAreaInvalid(ap) && pilnaPlatiba.touched">
+              Full area must be greater than 0
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="areaRelationInvalid(ap) && (pilnaPlatiba.touched || dzivojamaPlatiba.touched)">
+              Full area cannot be less than living area
+            </div>
+          </div>
+
+          <!-- LIVING AREA -->
+          <div class="mb-3">
+            <label class="form-label">Living Area</label>
+            <input
+              type="number"
+              class="form-control"
+              [(ngModel)]="ap.dzivojamaPlatiba"
+              name="dzivojamaPlatiba"
+              required
+              min="0.01"
+              step="0.01"
+              #dzivojamaPlatiba="ngModel"
+              [class.is-invalid]="(dzivojamaPlatiba.invalid && dzivojamaPlatiba.touched) || livingAreaInvalid(ap) || areaRelationInvalid(ap)"
+              (input)="normalizeDecimalField(ap, 'dzivojamaPlatiba')"
+              placeholder="Example: 48.20">
+
+            <div class="text-danger validation-text" *ngIf="dzivojamaPlatiba.errors?.['required'] && dzivojamaPlatiba.touched">
+              Living area is required
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="!dzivojamaPlatiba.errors?.['required'] && dzivojamaPlatiba.errors?.['min'] && dzivojamaPlatiba.touched">
+              Living area must be greater than 0
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="livingAreaInvalid(ap) && dzivojamaPlatiba.touched">
+              Living area must be greater than 0
+            </div>
+
+            <div class="text-danger validation-text" *ngIf="areaRelationInvalid(ap) && (dzivojamaPlatiba.touched || pilnaPlatiba.touched)">
+              Living area cannot be greater than full area
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="button"
+                    class="btn btn-primary"
+                    (click)="saveApartment()"
+                    [disabled]="apartmentForm.invalid || apartmentBusinessInvalid(ap)">
+              Save
+            </button>
+
+            <button type="button"
+                    class="btn btn-secondary"
+                    (click)="closeEditModal()">
+              Cancel
+            </button>
+          </div>
+
+        </form>
+
+        <hr>
+
+        <!-- RESIDENTS -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">Residents</h6>
+
+          <button class="btn btn-sm btn-success"
+                  (click)="addResident()">
+            + Add Resident
+          </button>
+        </div>
+
+        <!-- LIST -->
+        <div *ngIf="ap.iedzivotaji.length > 0">
+          <div class="modal-resident-card"
+               *ngFor="let r of ap.iedzivotaji">
+
+            <div class="card-body">
+              <h6 class="card-title">
+                {{ r.vards }} {{ r.uzvards }}
+              </h6>
+
+              <p class="mb-1">
+                <strong>Personal code:</strong>
+                {{ r.personasKods || '-' }}
+              </p>
+
+              <p class="mb-1">
+                <strong>Phone:</strong>
+                {{ r.telefons || '-' }}
+              </p>
+
+              <p class="mb-2">
+                <strong>Email:</strong>
+                {{ r.epasts || '-' }}
+              </p>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-primary"
+                        (click)="editResident(r)">
+                  Edit
+                </button>
+
+                <button class="btn btn-sm btn-danger"
+                        (click)="deleteResident(r.id)">
+                  Delete
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- EMPTY -->
+        <div *ngIf="ap.iedzivotaji.length === 0"
+             class="text-muted">
+          No residents
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- RESIDENT MODAL -->
+<div class="modal-overlay" *ngIf="selectedResident && !auth.isResident()">
+  <div class="custom-modal">
+
+    <h5>
+      {{ selectedResident.id ? 'Edit Resident' : 'Add Resident' }}
+    </h5>
+
+    <div class="mb-3">
+      <label>Name</label>
+      <input
+        class="form-control"
+        [(ngModel)]="selectedResident.vards"
+        name="residentName"
+        [class.is-invalid]="residentFieldTouched.name && !!residentErrors.name"
+        [attr.title]="residentFieldTouched.name && residentErrors.name ? residentErrors.name : null"
+        (input)="validateResidentField('name')"
+        (blur)="touchResidentField('name'); validateResidentField('name')"
+        (keydown)="allowOnlyLetters($event)"
+        placeholder="Example: Anna">
+      <div class="text-danger validation-text" *ngIf="residentFieldTouched.name && residentErrors.name">
+        {{ residentErrors.name }}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label>Surname</label>
+      <input
+        class="form-control"
+        [(ngModel)]="selectedResident.uzvards"
+        name="residentSurname"
+        [class.is-invalid]="residentFieldTouched.surname && !!residentErrors.surname"
+        [attr.title]="residentFieldTouched.surname && residentErrors.surname ? residentErrors.surname : null"
+        (input)="validateResidentField('surname')"
+        (blur)="touchResidentField('surname'); validateResidentField('surname')"
+        (keydown)="allowOnlyLetters($event)"
+        placeholder="Example: Ozolina">
+      <div class="text-danger validation-text" *ngIf="residentFieldTouched.surname && residentErrors.surname">
+        {{ residentErrors.surname }}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label>Personal Code</label>
+      <input
+        class="form-control"
+        [(ngModel)]="selectedResident.personasKods"
+        name="residentPersonalCode"
+        [class.is-invalid]="residentFieldTouched.personalCode && !!residentErrors.personalCode"
+        [attr.title]="residentFieldTouched.personalCode && residentErrors.personalCode ? residentErrors.personalCode : null"
+        (input)="validateResidentField('personalCode')"
+        (blur)="touchResidentField('personalCode'); validateResidentField('personalCode')"
+        placeholder="Example: 123456-12345">
+      <div class="text-danger validation-text" *ngIf="residentFieldTouched.personalCode && residentErrors.personalCode">
+        {{ residentErrors.personalCode }}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label>Phone</label>
+      <input
+        class="form-control"
+        [(ngModel)]="selectedResident.telefons"
+        name="residentPhone"
+        [class.is-invalid]="residentFieldTouched.phone && !!residentErrors.phone"
+        [attr.title]="residentFieldTouched.phone && residentErrors.phone ? residentErrors.phone : null"
+        (input)="validateResidentField('phone')"
+        (blur)="touchResidentField('phone'); validateResidentField('phone')"
+        placeholder="Example: +37120000000">
+      <div class="text-danger validation-text" *ngIf="residentFieldTouched.phone && residentErrors.phone">
+        {{ residentErrors.phone }}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label>Email</label>
+      <input
+        class="form-control"
+        [(ngModel)]="selectedResident.epasts"
+        name="residentEmail"
+        [class.is-invalid]="residentFieldTouched.email && !!residentErrors.email"
+        [attr.title]="residentFieldTouched.email && residentErrors.email ? residentErrors.email : null"
+        (input)="validateResidentField('email')"
+        (blur)="touchResidentField('email'); validateResidentField('email')"
+        placeholder="Example: anna@email.com">
+      <div class="text-danger validation-text" *ngIf="residentFieldTouched.email && residentErrors.email">
+        {{ residentErrors.email }}
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between">
+      <button class="btn btn-secondary"
+              (click)="closeResidentModal()">
+        Cancel
+      </button>
+
+      <button class="btn btn-primary"
+              (click)="saveResident()"
+              [disabled]="residentFormInvalid()">
+        Save
+      </button>
+    </div>
+
+  </div>
+</div>

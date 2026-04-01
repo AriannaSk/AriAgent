@@ -1,0 +1,139 @@
+<div class="resident-page">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">My Profile</h2>
+      <p class="page-subtitle">Manage your personal information</p>
+    </div>
+
+    <button class="back-btn" (click)="goBack()">
+      <i class="bi bi-arrow-left-short"></i>
+      Back
+    </button>
+  </div>
+
+  <div *ngIf="loading()" class="state-card">
+    Loading profile...
+  </div>
+
+  <div *ngIf="error()" class="message-card error-message">
+    {{ error() }}
+  </div>
+
+  <div *ngIf="success()" class="message-card success-message">
+    {{ success() }}
+  </div>
+
+  <div class="profile-card" *ngIf="!loading() && resident">
+    <div class="profile-card-header">
+      <div class="profile-icon">
+        <i class="bi bi-person-circle"></i>
+      </div>
+
+      <div>
+        <h3 class="profile-card-title">
+          {{ resident.vards }} {{ resident.uzvards }}
+        </h3>
+        <p class="profile-card-subtitle">
+          Update your profile details below
+        </p>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input
+          class="form-input"
+          [class.invalid]="showValidation() && !!validationErrors().vards"
+          [(ngModel)]="resident.vards"
+          (ngModelChange)="clearMessages(); validateForm()"
+          placeholder="Enter your name"
+        />
+        <div class="field-error" *ngIf="showValidation() && validationErrors().vards">
+          {{ validationErrors().vards }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Surname</label>
+        <input
+          class="form-input"
+          [class.invalid]="showValidation() && !!validationErrors().uzvards"
+          [(ngModel)]="resident.uzvards"
+          (ngModelChange)="clearMessages(); validateForm()"
+          placeholder="Enter your surname"
+        />
+        <div class="field-error" *ngIf="showValidation() && validationErrors().uzvards">
+          {{ validationErrors().uzvards }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input
+          class="form-input"
+          type="email"
+          [class.invalid]="showValidation() && !!validationErrors().epasts"
+          [(ngModel)]="resident.epasts"
+          (ngModelChange)="clearMessages(); validateForm()"
+          placeholder="Enter your email"
+        />
+        <div class="field-error" *ngIf="showValidation() && validationErrors().epasts">
+          {{ validationErrors().epasts }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input
+          class="form-input"
+          [class.invalid]="showValidation() && !!validationErrors().telefons"
+          [(ngModel)]="resident.telefons"
+          (ngModelChange)="clearMessages(); validateForm()"
+          placeholder="+37122222222"
+        />
+        <div class="field-error" *ngIf="showValidation() && validationErrors().telefons">
+          {{ validationErrors().telefons }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Personal Code</label>
+        <input
+          class="form-input"
+          [class.invalid]="showValidation() && !!validationErrors().personasKods"
+          [(ngModel)]="resident.personasKods"
+          (ngModelChange)="clearMessages(); validateForm()"
+          placeholder="030303-11112"
+        />
+        <div class="field-error" *ngIf="showValidation() && validationErrors().personasKods">
+          {{ validationErrors().personasKods }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Owner</label>
+        <input
+          class="form-input readonly-input"
+          [value]="resident.isOwner ? 'Yes' : 'No'"
+          readonly
+        />
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button
+        class="save-btn"
+        (click)="save()"
+        [disabled]="saving()"
+      >
+        <i class="bi bi-check2-circle"></i>
+        {{ saving() ? 'Saving...' : 'Save changes' }}
+      </button>
+
+      <button class="cancel-btn" (click)="goBack()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</div>

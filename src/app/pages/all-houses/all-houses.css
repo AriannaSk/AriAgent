@@ -1,0 +1,258 @@
+body{
+  background: var(--bg);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.houses-page{
+  max-width: 1420px;
+}
+
+.page-title{
+  color: var(--title);
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.page-subtitle{
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+/* INPUT */
+
+.form-control{
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  transition: all 0.2s;
+}
+
+.form-control:focus{
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(82, 83, 165, 0.15);
+}
+
+/* SEARCH */
+
+.search-wrap{
+  position: relative;
+}
+
+.search-icon{
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.search-input{
+  padding-left: 38px;
+}
+
+/* STATUS */
+
+.results-info{
+  color: #6b7280;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.status-box{
+  font-size: 0.95rem;
+}
+
+.empty-state{
+  padding: 40px 20px;
+}
+
+/* HOUSE CARD */
+
+.house-card{
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 18px;
+  overflow: hidden;
+  padding: 6px;
+  cursor: pointer;
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+  box-shadow:
+    0 6px 16px rgba(15, 23, 42, 0.04),
+    0 0 0 1px rgba(148,163,184,0.06);
+}
+
+.house-card:hover{
+  transform: translateY(-4px);
+  border-color: #93c5fd;
+  box-shadow:
+    0 14px 30px rgba(59,130,246,0.10),
+    0 0 0 1px rgba(59,130,246,0.10);
+}
+
+.house-heading{
+  min-width: 0;
+}
+
+.card-title{
+  color: var(--text);
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 0;
+  word-break: break-word;
+}
+
+.house-location{
+  color: #4b5563;
+  font-size: 0.98rem;
+}
+
+.house-postal{
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
+.house-card-footer{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(148,163,184,0.18);
+}
+
+.open-hint{
+  font-size: 0.92rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.open-arrow{
+  font-size: 1.1rem;
+  color: #3b82f6;
+  font-weight: 700;
+  transition: transform .2s ease;
+}
+
+.house-card:hover .open-arrow{
+  transform: translateX(4px);
+}
+
+/* BUTTONS */
+
+.btn{
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.toolbar-btn{
+  min-width: 110px;
+}
+
+.action-btn{
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+.btn-outline-primary:hover{
+  background: #3b82f6;
+  color: white;
+}
+
+.btn-outline-danger:hover{
+  background: #ef4444;
+  color: white;
+}
+
+.btn-success{
+  background: #10b981;
+  border: none;
+}
+
+.btn-success:hover{
+  background: #059669;
+}
+
+/* MODAL */
+
+.custom-house-modal{
+  border: none;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(15,23,42,0.16);
+}
+
+.modal-header,
+.modal-footer{
+  border-color: rgba(148,163,184,0.18);
+}
+
+.modal-title{
+  font-weight: 700;
+}
+
+/* DELETE MODAL */
+
+.modal-overlay{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.custom-modal{
+  background: var(--card);
+  padding: 24px;
+  border-radius: 16px;
+  width: 320px;
+  box-shadow:
+    0 10px 40px rgba(0,0,0,0.2),
+    0 0 20px rgba(59,130,246,0.14);
+}
+
+.modal-actions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 768px){
+  .page-title{
+    font-size: 1.75rem;
+  }
+
+  .card-title{
+    font-size: 1.3rem;
+  }
+
+  .toolbar-btn{
+    min-width: auto;
+  }
+}
+.form-control.is-invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.15);
+}
+
+.invalid-feedback {
+  font-size: 0.82rem;
+  margin-top: 4px;
+  color: #dc3545;
+  line-height: 1.2;
+}

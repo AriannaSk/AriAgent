@@ -1,0 +1,184 @@
+<div class="resident-dashboard-page">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="page-title">Resident Cabinet</h1>
+      <p class="page-subtitle">
+        Manage your apartment, profile and invoices in one place
+      </p>
+    </div>
+
+    <div class="user-chip">
+      <div class="user-avatar">
+        {{ userInitials() }}
+      </div>
+
+      <div class="user-chip-text">
+        <span class="user-chip-name">{{ residentFullName() }}</span>
+        <span class="user-chip-role">Resident</span>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading()" class="state-card">
+    Loading dashboard...
+  </div>
+
+  <div *ngIf="error()" class="error-card">
+    {{ error() }}
+  </div>
+
+  <ng-container *ngIf="!loading() && !error()">
+    <section class="welcome-card">
+      <div class="welcome-content">
+        <span class="welcome-badge">Overview</span>
+        <h2>Welcome back, {{ residentFullName() }} 👋</h2>
+        <p>
+          Here you can review your apartment details, personal information and recent invoices.
+        </p>
+      </div>
+
+      <div class="welcome-stats">
+        <div class="mini-stat">
+          <span class="mini-stat-label">Apartment</span>
+          <strong>{{ apartment()?.numurs ? ('#' + apartment()?.numurs) : '—' }}</strong>
+        </div>
+
+        <div class="mini-stat">
+          <span class="mini-stat-label">Invoices</span>
+          <strong>{{ invoices().length }}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <article class="dashboard-card">
+        <div class="card-top">
+          <div class="card-icon profile-icon">
+            <i class="bi bi-person-circle"></i>
+          </div>
+          <span class="card-tag">Profile</span>
+        </div>
+
+        <h3 class="card-title">{{ residentFullName() }}</h3>
+
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ residentEmail() }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Phone</span>
+            <span class="info-value">{{ residentPhone() }}</span>
+          </div>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Personal Code</span>
+          <span class="info-value">{{ residentPersonalCode() }}</span>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-secondary" (click)="openProfile()">
+            Edit profile
+          </button>
+        </div>
+      </article>
+
+      <article class="dashboard-card">
+        <div class="card-top">
+          <div class="card-icon apartment-icon">
+            <i class="bi bi-building"></i>
+          </div>
+          <span class="card-tag">Apartment</span>
+        </div>
+
+        <h3 class="card-title">
+          Apartment {{ apartment()?.numurs ? ('#' + apartment()?.numurs) : '—' }}
+        </h3>
+
+        <div class="info-list" *ngIf="apartment() as ap; else noApartment">
+          <div class="info-row">
+            <span class="info-label">Floor</span>
+            <span class="info-value">{{ ap.stavs }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Rooms</span>
+            <span class="info-value">{{ ap.istabuSkaits }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Area</span>
+            <span class="info-value">
+              {{ ap.pilnaPlatiba != null ? (ap.pilnaPlatiba + ' m²') : '—' }}
+            </span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Address</span>
+            <span class="info-value address-value">
+              {{ houseAddress() || 'Address unavailable' }}
+            </span>
+          </div>
+        </div>
+
+        <ng-template #noApartment>
+          <div class="empty-mini">
+            No apartment linked to your account.
+          </div>
+        </ng-template>
+
+        <div class="card-actions">
+          <button
+            class="btn-secondary"
+            (click)="apartment()?.id && openApartment(apartment()!.id)"
+            [disabled]="!apartment()?.id"
+          >
+            View apartment
+          </button>
+        </div>
+      </article>
+
+      <article class="dashboard-card">
+        <div class="card-top">
+          <div class="card-icon invoice-icon">
+            <i class="bi bi-receipt"></i>
+          </div>
+          <span class="card-tag">Invoices</span>
+        </div>
+
+        <h3 class="card-title">
+          {{ unpaidInvoicesCount() }} unpaid invoice{{ unpaidInvoicesCount() === 1 ? '' : 's' }}
+        </h3>
+
+        <div class="info-list">
+          <div class="info-row">
+            <span class="info-label">Latest amount</span>
+            <span class="info-value">
+              {{ latestInvoice()?.total != null ? (latestInvoice()?.total + ' €') : '0.00 €' }}
+            </span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Latest period</span>
+            <span class="info-value">{{ latestInvoice()?.period || '—' }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Status</span>
+            <span class="status-badge" [class.paid]="unpaidInvoicesCount() === 0">
+              {{ unpaidInvoicesCount() > 0 ? 'Requires attention' : 'All paid' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-primary" (click)="openInvoices()">
+            Open invoices
+          </button>
+        </div>
+      </article>
+    </section>
+
+  </ng-container>
+</div>

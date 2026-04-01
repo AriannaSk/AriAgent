@@ -1,0 +1,29 @@
+<div class="layout" *ngIf="!isLoginPage()">
+  <aside class="sidebar">
+    <app-manager-sidebar
+      *ngIf="auth.isManager()"
+      [showSettings]="showSettings"
+      [isDark]="isDark"
+      (toggleSettingsClick)="toggleSettings()"
+      (toggleThemeClick)="toggleTheme()"
+      (logoutClick)="logout()">
+    </app-manager-sidebar>
+
+    <app-resident-sidebar
+      *ngIf="auth.isResident()"
+      [showSettings]="showSettings"
+      [isDark]="isDark"
+      (toggleSettingsClick)="toggleSettings()"
+      (toggleThemeClick)="toggleTheme()"
+      (logoutClick)="logout()">
+    </app-resident-sidebar>
+  </aside>
+
+  <main class="page">
+    <section class="page-content">
+      <router-outlet></router-outlet>
+    </section>
+  </main>
+</div>
+
+<router-outlet *ngIf="isLoginPage()"></router-outlet>

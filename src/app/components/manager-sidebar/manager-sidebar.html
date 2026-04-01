@@ -1,0 +1,59 @@
+<div class="sidebar-logo">
+  <i class="bi bi-house-heart-fill"></i>
+  <span>AriAgent</span>
+</div>
+
+<nav class="sidebar-menu">
+  <a routerLink="/houses" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+    <i class="bi bi-house-fill"></i>
+    <span>Houses</span>
+  </a>
+
+  <a routerLink="/apartments" routerLinkActive="active">
+    <i class="bi bi-building"></i>
+    <span>Apartments</span>
+  </a>
+
+  <a routerLink="/residents" routerLinkActive="active">
+    <i class="bi bi-people-fill"></i>
+    <span>Residents</span>
+  </a>
+
+  <a routerLink="/invoices" routerLinkActive="active">
+    <i class="bi bi-receipt"></i>
+    <span>Invoices</span>
+  </a>
+
+  <a (click)="toggleSettingsClick.emit()">
+    <i class="bi bi-gear-fill"></i>
+    <span>Settings</span>
+  </a>
+
+<div class="sidebar-settings" *ngIf="showSettings">
+  <div class="settings-item">
+    <span class="settings-label">
+      {{ isDark ? 'Dark mode' : 'Light mode' }}
+    </span>
+
+    <button
+      class="theme-toggle"
+      [class.dark]="isDark"
+      [class.light]="!isDark"
+      (click)="toggleThemeClick.emit()"
+      type="button"
+      aria-label="Toggle theme"
+    >
+      <div class="toggle-circle">
+        <span>{{ isDark ? '🌙' : '☀️' }}</span>
+      </div>
+    </button>
+  </div>
+</div>
+</nav>
+
+<div class="sidebar-bottom">
+  <button class="logout-btn" (click)="logoutClick.emit()">
+    <i class="bi bi-box-arrow-right me-2"></i>
+    Logout
+  </button>
+</div>

@@ -1,0 +1,281 @@
+<div class="container houses-page mt-5">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold page-title mb-1">Houses</h2>
+      <p class="page-subtitle mb-0">
+        Manage buildings and quickly navigate to apartments
+      </p>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button
+        class="btn btn-outline-primary toolbar-btn"
+        (click)="loadHouses()">
+        Refresh
+      </button>
+
+      <button
+        *ngIf="auth.isManager()"
+        class="btn btn-success toolbar-btn"
+        (click)="createHouse()">
+        + Add House
+      </button>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="row mb-3">
+    <div class="col-lg-7 col-md-8">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input
+          class="form-control search-input"
+          placeholder="Search by street, city or house number..."
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS INFO -->
+  <div
+    class="d-flex justify-content-between align-items-center mb-3"
+    *ngIf="!loading() && filteredHouses().length > 0">
+    <div class="results-info">
+      Showing {{ filteredHouses().length }} house{{ filteredHouses().length === 1 ? '' : 's' }}
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading()" class="status-box text-muted">
+    Loading houses...
+  </div>
+
+  <!-- ERROR -->
+  <div *ngIf="error()" class="status-box text-danger">
+    {{ error() }}
+  </div>
+
+  <!-- EMPTY -->
+  <div
+    *ngIf="!loading() && filteredHouses().length === 0"
+    class="empty-state text-center text-muted mt-5">
+    <h5 class="mb-2">No houses found</h5>
+    <p class="mb-0">Try changing the search term or add a new house.</p>
+  </div>
+
+  <!-- GRID -->
+  <div
+    class="row g-4"
+    *ngIf="!loading() && filteredHouses().length > 0">
+
+    <div
+      class="col-xl-4 col-md-6"
+      *ngFor="let h of filteredHouses()">
+
+      <div
+        class="card house-card h-100"
+        (click)="openHouseApartments(h.id)">
+
+        <div class="card-body d-flex flex-column">
+
+          <!-- HEADER -->
+          <div class="d-flex justify-content-between align-items-start mb-3 gap-2">
+            <div class="house-heading">
+              <h5 class="card-title m-0">
+                {{ h.iela }} {{ h.numurs }}
+              </h5>
+            </div>
+
+            <div class="d-flex gap-2 flex-shrink-0">
+              <button
+                class="btn btn-sm btn-outline-primary action-btn"
+                (click)="openHouse(h.id); $event.stopPropagation()">
+                Edit
+              </button>
+
+              <button
+                class="btn btn-sm btn-outline-danger action-btn"
+                (click)="openDeleteHouseModal(h); $event.stopPropagation()">
+                Delete
+              </button>
+            </div>
+          </div>
+
+          <!-- INFO -->
+          <p class="house-location mb-1">
+            {{ h.pilseta }}, {{ h.valsts }}
+          </p>
+
+          <div class="house-postal">
+            Postal code: {{ h.pastaIndekss }}
+          </div>
+
+          <!-- FOOTER -->
+          <div class="house-card-footer mt-auto">
+            <span class="open-hint">Open apartments</span>
+            <span class="open-arrow">→</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div
+  class="modal fade show"
+  *ngIf="showModal()"
+  style="display:block; background:rgba(0,0,0,0.4)">
+
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content custom-house-modal">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ editingHouse()?.id ? 'Edit House' : 'Add House' }}
+        </h5>
+
+        <button
+          class="btn-close"
+          (click)="closeModal()"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row g-3">
+
+          <!-- STREET -->
+          <div class="col-md-6">
+            <label class="form-label">Street</label>
+            <input
+              class="form-control"
+              [class.is-invalid]="hasError('iela')"
+              [attr.title]="hasError('iela') ? getError('iela') : null"
+              [value]="editingHouse()?.iela"
+              (input)="updateField('iela', $any($event.target).value)"
+              (blur)="markTouched('iela'); validateField('iela')"
+              (keydown)="allowOnlyLetters($event)"
+              placeholder="Example: Krisjana barona iela">
+            <div class="invalid-feedback d-block" *ngIf="hasError('iela')">
+              {{ getError('iela') }}
+            </div>
+          </div>
+
+          <!-- NUMBER -->
+          <div class="col-md-6">
+            <label class="form-label">Number</label>
+            <input
+              class="form-control"
+              type="number"
+              min="1"
+              [class.is-invalid]="hasError('numurs')"
+              [attr.title]="hasError('numurs') ? getError('numurs') : null"
+              [value]="editingHouse()?.numurs"
+              (input)="updateField('numurs', $any($event.target).value)"
+              (blur)="markTouched('numurs'); validateField('numurs')"
+              placeholder="Example: 15">
+            <div class="invalid-feedback d-block" *ngIf="hasError('numurs')">
+              {{ getError('numurs') }}
+            </div>
+          </div>
+
+          <!-- CITY -->
+          <div class="col-md-6">
+            <label class="form-label">City</label>
+            <input
+              class="form-control"
+              [class.is-invalid]="hasError('pilseta')"
+              [attr.title]="hasError('pilseta') ? getError('pilseta') : null"
+              [value]="editingHouse()?.pilseta"
+              (input)="updateField('pilseta', $any($event.target).value)"
+              (blur)="markTouched('pilseta'); validateField('pilseta')"
+              (keydown)="allowOnlyLetters($event)"
+              placeholder="Example: Riga">
+            <div class="invalid-feedback d-block" *ngIf="hasError('pilseta')">
+              {{ getError('pilseta') }}
+            </div>
+          </div>
+
+          <!-- POSTAL CODE -->
+          <div class="col-md-6">
+            <label class="form-label">Postal Code</label>
+            <input
+              class="form-control"
+              [class.is-invalid]="hasError('pastaIndekss')"
+              [attr.title]="hasError('pastaIndekss') ? getError('pastaIndekss') : null"
+              [value]="editingHouse()?.pastaIndekss"
+              (input)="updateField('pastaIndekss', $any($event.target).value)"
+              (blur)="markTouched('pastaIndekss'); validateField('pastaIndekss')"
+              placeholder="Example: LV-1010">
+            <div class="invalid-feedback d-block" *ngIf="hasError('pastaIndekss')">
+              {{ getError('pastaIndekss') }}
+            </div>
+          </div>
+
+          <!-- COUNTRY -->
+          <div class="col-md-6">
+            <label class="form-label">Country</label>
+            <input
+              class="form-control"
+              [class.is-invalid]="hasError('valsts')"
+              [attr.title]="hasError('valsts') ? getError('valsts') : null"
+              [value]="editingHouse()?.valsts"
+              (input)="updateField('valsts', $any($event.target).value)"
+              (blur)="markTouched('valsts'); validateField('valsts')"
+              (keydown)="allowOnlyLetters($event)"
+              placeholder="Example: Latvia">
+            <div class="invalid-feedback d-block" *ngIf="hasError('valsts')">
+              {{ getError('valsts') }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button
+          class="btn btn-secondary"
+          (click)="closeModal()">
+          Cancel
+        </button>
+
+        <button
+          class="btn btn-primary"
+          (click)="saveHouse()">
+          Save
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" *ngIf="showDeleteHouseModal">
+  <div class="custom-modal">
+
+    <h5 class="mb-2">Delete house</h5>
+
+    <p class="mb-0">
+      Delete <strong>{{ selectedHouse?.iela }} {{ selectedHouse?.numurs }}</strong>?
+    </p>
+
+    <div class="modal-actions">
+      <button
+        class="btn btn-secondary"
+        (click)="closeDeleteHouseModal()">
+        Cancel
+      </button>
+
+      <button
+        class="btn btn-danger"
+        (click)="confirmDeleteHouse()">
+        Delete
+      </button>
+    </div>
+
+  </div>
+</div>

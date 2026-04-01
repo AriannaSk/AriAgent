@@ -1,0 +1,250 @@
+.resident-apartment-detail-page {
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 28px 24px 34px;
+  color: var(--text);
+}
+
+/* HEADER */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.6px;
+}
+
+.page-subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  border-radius: 14px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #f8fafc;
+  border-color: #93c5fd;
+}
+
+.back-btn i {
+  font-size: 18px;
+}
+
+/* STATES */
+.state-card,
+.message-card {
+  border-radius: 18px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  font-weight: 500;
+}
+
+.state-card {
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.error-message {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  color: #b91c1c;
+}
+
+/* MAIN CARD */
+.apartment-card {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 28px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+}
+
+.apartment-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.apartment-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: white;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.apartment-title {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+.apartment-subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* INFO GRID */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.info-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 16px;
+  border-radius: 18px;
+  border: 1px solid #dbe3ef;
+  background: #f8fbff;
+}
+
+.info-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.info-value {
+  font-size: 25px;
+  font-weight: 800;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+/* DIVIDER */
+.section-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 26px 0;
+}
+
+/* TITLES */
+.section-title {
+  margin: 0 0 14px;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+/* ADDRESS */
+.address-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid #dbe3ef;
+  background: #f8fbff;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.address-box i {
+  color: #2563eb;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+/* RESIDENTS */
+.residents-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.resident-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 15px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.16);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.resident-chip i {
+  color: #2563eb;
+  font-size: 16px;
+}
+
+.empty-state {
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px dashed var(--border);
+  background: rgba(248, 250, 252, 0.85);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .resident-apartment-detail-page {
+    padding: 22px 14px 24px;
+  }
+
+  .page-title {
+    font-size: 32px;
+  }
+
+  .apartment-card {
+    padding: 22px;
+  }
+
+  .apartment-title {
+    font-size: 26px;
+  }
+
+  .info-value {
+    font-size: 26px;
+  }
+
+  .back-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

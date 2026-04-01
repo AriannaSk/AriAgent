@@ -1,0 +1,306 @@
+<div class="container residents-page mt-5">
+
+  <!-- HEADER -->
+  <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+    <div>
+      <h2 class="fw-bold page-title mb-1">Residents</h2>
+      <p class="page-subtitle mb-0">
+        View and manage residents across all apartments
+      </p>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="row mb-3">
+    <div class="col-lg-7 col-md-8">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input
+          class="form-control search-input"
+          placeholder="Search resident..."
+          [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary-row mb-3" *ngIf="!loading()">
+    <div class="summary-item">
+      <span class="summary-label">Total residents</span>
+      <span class="summary-value">{{ residents().length }}</span>
+    </div>
+
+    <div class="summary-item">
+      <span class="summary-label">Shown residents</span>
+      <span class="summary-value">{{ filteredResidents().length }}</span>
+    </div>
+
+    <div class="summary-item">
+      <span class="summary-label">Linked apartments</span>
+      <span class="summary-value">{{ getTotalLinkedApartments() }}</span>
+    </div>
+  </div>
+
+  <!-- RESULTS INFO -->
+  <div class="results-info mb-3"
+       *ngIf="!loading() && filteredResidents().length > 0">
+    Showing {{ filteredResidents().length }} resident{{ filteredResidents().length === 1 ? '' : 's' }}
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading()" class="text-muted">
+    Loading residents...
+  </div>
+
+  <!-- EMPTY -->
+  <div *ngIf="!loading() && filteredResidents().length === 0"
+       class="text-center text-muted mt-5">
+    <h5>No residents found</h5>
+  </div>
+
+  <!-- GRID -->
+  <div class="row g-3"
+       *ngIf="!loading() && filteredResidents().length > 0">
+
+    <div class="col-md-4"
+         *ngFor="let r of filteredResidents()">
+
+      <div class="card resident-card">
+        <div class="card-body">
+
+          <!-- HEADER -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+
+            <h5 class="card-title m-0">
+              {{ r.vards }} {{ r.uzvards }}
+            </h5>
+
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm btn-outline-primary"
+                      (click)="openEditModal(r)">
+                Edit
+              </button>
+
+              <button class="btn btn-sm btn-outline-danger"
+                      (click)="deleteResident(r)">
+                Delete
+              </button>
+            </div>
+
+          </div>
+
+          <!-- INFO -->
+          <div class="resident-info">
+            <div>Code: {{ r.personasKods || '-' }}</div>
+            <div>Phone: {{ r.telefons || '-' }}</div>
+            <div>Email: {{ r.epasts || '-' }}</div>
+          </div>
+
+          <hr>
+
+          <!-- APARTMENTS -->
+          <div class="resident-apartments">
+
+            <div class="fw-semibold mb-2">
+              🏠 Apartments ({{ r.dzivokli?.length || 0 }})
+            </div>
+
+            <div *ngIf="r.dzivokli?.length">
+              <div *ngFor="let d of r.dzivokli"
+                   class="apartment-item"
+                   (click)="goToApartment(d.id)">
+
+                Apartment #{{ d.numurs }}
+
+                <div class="apartment-address">
+                  {{ d.majaNosaukums || 'Address not available' }}
+                </div>
+
+              </div>
+            </div>
+
+            <div *ngIf="!r.dzivokli?.length"
+                 class="text-muted small">
+              No apartments
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" *ngIf="editingResident as r">
+
+  <div class="custom-modal large-scroll">
+
+    <div class="card-header">
+      <h5 class="mb-0">
+        {{ r.id ? 'Edit Resident' : 'Add Resident' }}
+      </h5>
+    </div>
+
+    <div class="card-body">
+
+      <form #residentForm="ngForm">
+
+        <!-- NAME -->
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input
+            class="form-control"
+            [(ngModel)]="r.vards"
+            name="vards"
+            [class.is-invalid]="residentFieldTouched.name && !!residentErrors.name"
+            [attr.title]="residentFieldTouched.name && residentErrors.name ? residentErrors.name : null"
+            (input)="validateResidentField('name')"
+            (blur)="touchResidentField('name'); validateResidentField('name')"
+            (keydown)="allowOnlyLetters($event)"
+            placeholder="Example: Anna">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.name && residentErrors.name">
+            {{ residentErrors.name }}
+          </div>
+        </div>
+
+        <!-- SURNAME -->
+        <div class="mb-3">
+          <label class="form-label">Surname</label>
+          <input
+            class="form-control"
+            [(ngModel)]="r.uzvards"
+            name="uzvards"
+            [class.is-invalid]="residentFieldTouched.surname && !!residentErrors.surname"
+            [attr.title]="residentFieldTouched.surname && residentErrors.surname ? residentErrors.surname : null"
+            (input)="validateResidentField('surname')"
+            (blur)="touchResidentField('surname'); validateResidentField('surname')"
+            (keydown)="allowOnlyLetters($event)"
+            placeholder="Example: Ozolina">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.surname && residentErrors.surname">
+            {{ residentErrors.surname }}
+          </div>
+        </div>
+
+        <!-- PERSONAL CODE -->
+        <div class="mb-3">
+          <label class="form-label">Personal Code</label>
+          <input
+            class="form-control"
+            [(ngModel)]="r.personasKods"
+            name="personasKods"
+            [class.is-invalid]="residentFieldTouched.personalCode && !!residentErrors.personalCode"
+            [attr.title]="residentFieldTouched.personalCode && residentErrors.personalCode ? residentErrors.personalCode : null"
+            (input)="validateResidentField('personalCode')"
+            (blur)="touchResidentField('personalCode'); validateResidentField('personalCode')"
+            placeholder="Example: 123456-12345">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.personalCode && residentErrors.personalCode">
+            {{ residentErrors.personalCode }}
+          </div>
+        </div>
+
+        <!-- PHONE -->
+        <div class="mb-3">
+          <label class="form-label">Phone</label>
+          <input
+            class="form-control"
+            [(ngModel)]="r.telefons"
+            name="telefons"
+            [class.is-invalid]="residentFieldTouched.phone && !!residentErrors.phone"
+            [attr.title]="residentFieldTouched.phone && residentErrors.phone ? residentErrors.phone : null"
+            (input)="validateResidentField('phone')"
+            (blur)="touchResidentField('phone'); validateResidentField('phone')"
+            placeholder="Example: +37120000000">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.phone && residentErrors.phone">
+            {{ residentErrors.phone }}
+          </div>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input
+            class="form-control"
+            [(ngModel)]="r.epasts"
+            name="epasts"
+            [class.is-invalid]="residentFieldTouched.email && !!residentErrors.email"
+            [attr.title]="residentFieldTouched.email && residentErrors.email ? residentErrors.email : null"
+            (input)="validateResidentField('email')"
+            (blur)="touchResidentField('email'); validateResidentField('email')"
+            placeholder="Example: anna@email.com">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.email && residentErrors.email">
+            {{ residentErrors.email }}
+          </div>
+        </div>
+
+        <div class="mb-3 form-check">
+          <input type="checkbox"
+                 class="form-check-input"
+                 [(ngModel)]="r.isOwner"
+                 name="isOwner">
+          <label class="form-check-label">
+            Owner
+          </label>
+        </div>
+
+        <div class="d-flex gap-2">
+
+          <button type="button"
+                  class="btn btn-primary"
+                  (click)="saveResident()"
+                  [disabled]="residentFormInvalid() || isSaving">
+            {{ isSaving ? 'Saving...' : 'Save' }}
+          </button>
+
+          <button type="button"
+                  class="btn btn-secondary"
+                  (click)="closeEditModal()">
+            Cancel
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- DELETE MODAL -->
+<div class="modal-overlay" *ngIf="showDeleteModal">
+
+  <div class="custom-modal delete-modal">
+
+    <h5 class="modal-title">
+      Delete resident
+    </h5>
+
+    <p class="modal-text">
+      Delete {{ selectedResidentForDelete?.vards }}
+      {{ selectedResidentForDelete?.uzvards }}?
+    </p>
+
+    <div class="modal-actions">
+
+      <button class="btn btn-cancel"
+              (click)="closeDeleteModal()">
+        Cancel
+      </button>
+
+      <button class="btn btn-delete"
+              (click)="confirmDelete()">
+        Delete
+      </button>
+
+    </div>
+
+  </div>
+
+</div>

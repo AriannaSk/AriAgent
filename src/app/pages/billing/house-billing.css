@@ -1,0 +1,618 @@
+.billing-page {
+  max-width: 1280px;
+  color: var(--text);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--title);
+}
+
+.summary-card,
+.total-card,
+.edit-modal,
+.billing-page .card {
+  border-radius: 16px;
+}
+
+.billing-page .card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+  transition: 0.25s;
+}
+
+.dark-theme .billing-page .card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.summary-label {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  margin-bottom: 0.35rem;
+}
+
+.summary-value {
+  color: var(--title);
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.dark-theme .summary-value {
+  color: #f8fafc;
+}
+
+.billing-table,
+.billing-page .table {
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--text);
+  color: var(--text);
+}
+
+.billing-page .table thead th {
+  color: var(--title);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.billing-page .table tbody td {
+  color: var(--text);
+  vertical-align: middle;
+  border-top: 1px solid rgba(120, 130, 150, 0.16);
+}
+
+.dark-theme .billing-page .table tbody td {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+}
+
+.billing-page .table-hover tbody tr:hover {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.dark-theme .billing-page .table-hover tbody tr:hover {
+  background: rgba(147, 197, 253, 0.05);
+}
+
+.dark-theme .billing-page .table thead th {
+  color: #e2e8f0;
+}
+
+.billing-page .text-secondary,
+.billing-page .small,
+.billing-page label {
+  color: var(--text-secondary) !important;
+}
+
+.dark-theme .billing-page .text-secondary,
+.dark-theme .billing-page .small,
+.dark-theme .billing-page label {
+  color: #cbd5e1 !important;
+}
+
+.dark-theme .billing-page .fw-semibold,
+.dark-theme .billing-page .fw-bold,
+.dark-theme .billing-page .card-title,
+.dark-theme .billing-page h5,
+.dark-theme .billing-page h4,
+.dark-theme .billing-page h3,
+.dark-theme .billing-page h2 {
+  color: #f8fafc;
+}
+
+.status-badge {
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.35rem 0.55rem;
+}
+
+.text-warning-emphasis {
+  color: #996c00;
+}
+
+.bg-warning-subtle {
+  background: #fff3cd;
+}
+
+.text-info-emphasis {
+  color: #055160;
+}
+
+.bg-info-subtle {
+  background: #cff4fc;
+}
+
+.dark-theme .bg-warning-subtle {
+  background: rgba(245, 158, 11, 0.14) !important;
+}
+
+.dark-theme .text-warning-emphasis {
+  color: #fcd34d !important;
+}
+
+.dark-theme .bg-info-subtle {
+  background: rgba(34, 211, 238, 0.14) !important;
+}
+
+.dark-theme .text-info-emphasis {
+  color: #67e8f9 !important;
+}
+
+.dark-theme .badge.bg-success-subtle {
+  background: rgba(34, 197, 94, 0.14) !important;
+  color: #86efac !important;
+  border-color: rgba(34, 197, 94, 0.35) !important;
+}
+
+.dark-theme .badge.bg-danger-subtle {
+  background: rgba(239, 68, 68, 0.14) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+
+.total-card {
+  border: 1px solid #2563eb !important;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(37, 99, 235, 0.02));
+}
+
+.dark-theme .total-card {
+  border: 1px solid #60a5fa !important;
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.12), rgba(30, 41, 59, 0.65));
+}
+
+.total-card .text-primary,
+.summary-value.text-primary {
+  color: #2563eb !important;
+}
+
+.dark-theme .total-card .text-primary,
+.dark-theme .summary-value.text-primary {
+  color: #93c5fd !important;
+}
+
+.dark-theme .summary-value.text-success {
+  color: #86efac !important;
+}
+
+.dark-theme .summary-value.text-danger {
+  color: #fca5a5 !important;
+}
+
+.dark-theme .billing-page .alert-info {
+  background: rgba(59, 130, 246, 0.14);
+  color: #dbeafe;
+  border: 1px solid rgba(96, 165, 250, 0.35);
+}
+
+.validation-text {
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+
+.edit-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 16px;
+}
+
+.edit-modal {
+  width: 100%;
+  max-width: 520px;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+}
+
+.dark-theme .edit-modal-overlay {
+  background: rgba(2, 6, 23, 0.72);
+}
+
+.dark-theme .edit-modal {
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .edit-modal h4,
+.dark-theme .edit-modal label {
+  color: #f8fafc !important;
+}
+
+.dark-theme .edit-modal .form-control,
+.dark-theme .edit-modal textarea {
+  background: rgba(255, 255, 255, 0.03);
+  color: #f8fafc;
+  border: 1px solid var(--border);
+}
+
+.dark-theme .edit-modal .form-control:focus,
+.dark-theme .edit-modal textarea:focus {
+  background: rgba(255, 255, 255, 0.04);
+  color: #f8fafc;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18);
+}
+
+.dark-theme .billing-page .btn-outline-secondary {
+  color: #e2e8f0;
+  border-color: #64748b;
+}
+
+.dark-theme .billing-page .btn-outline-secondary:hover {
+  background: #334155;
+  color: #fff;
+  border-color: #64748b;
+}
+
+.dark-theme .billing-page .btn-outline-primary {
+  color: #dbeafe;
+  border-color: #60a5fa;
+}
+
+.dark-theme .billing-page .btn-outline-primary:hover {
+  background: #2563eb;
+  color: #fff;
+  border-color: #2563eb;
+}
+
+.dark-theme .billing-page .btn-success {
+  background: #15803d;
+  border-color: #15803d;
+}
+
+.dark-theme .billing-page .btn-success:hover {
+  background: #166534;
+  border-color: #166534;
+}
+
+.dark-theme .billing-page .btn-primary {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.dark-theme .billing-page .btn-primary:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.dark-theme .billing-page .btn-secondary {
+  background: #475569;
+  border-color: #475569;
+}
+
+.dark-theme .billing-page .btn-secondary:hover {
+  background: #334155;
+  border-color: #334155;
+}
+
+.billing-page .form-control-sm,
+.billing-page .period-input {
+  min-height: 38px;
+}
+
+.dark-theme .billing-page .form-control,
+.dark-theme .billing-page input,
+.dark-theme .billing-page textarea {
+  background: rgba(255, 255, 255, 0.03);
+  color: #f8fafc;
+  border: 1px solid var(--border);
+}
+
+.dark-theme .billing-page .form-control::placeholder,
+.dark-theme .billing-page input::placeholder,
+.dark-theme .billing-page textarea::placeholder {
+  color: #94a3b8;
+}
+
+.dark-theme .billing-page .text-danger {
+  color: #fca5a5 !important;
+}
+
+.dark-theme .billing-page .text-success {
+  color: #86efac !important;
+}
+
+.dark-theme .billing-page .text-warning {
+  color: #fcd34d !important;
+}
+
+.billing-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.dark-theme .billing-page .billing-select {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.dark-theme .billing-page .billing-select:focus {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18) !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.form-control{
+  background-color: var(--card);
+}
+
+.dark-theme .billing-page .billing-select:disabled,
+.dark-theme .billing-page .billing-select[disabled] {
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+  border: 1px solid #475569 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+  opacity: 1 !important;
+  cursor: not-allowed !important;
+  box-shadow: none !important;
+}
+
+.dark-theme .billing-page .billing-select option {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+.dark-theme .billing-page .billing-select:disabled option {
+  background-color: #1e293b !important;
+  color: #94a3b8 !important;
+}
+.dark-theme .billing-page .apartment-select {
+  background-color: #1e293b !important;
+}
+
+.dark-theme .billing-page .apartment-select:disabled {
+  background-color: #223049 !important;
+  color: #94a3b8 !important;
+}
+
+@media (max-width: 768px) {
+  .billing-page {
+    margin-top: 1rem !important;
+  }
+
+  .page-title {
+    font-size: 1.65rem;
+  }
+
+  .summary-value {
+    font-size: 1.4rem;
+  }
+
+  .edit-modal {
+    padding: 16px;
+  }
+}
+/* DARK THEME MODAL FIX */
+
+.dark-theme .edit-modal-overlay {
+  background: rgba(2, 6, 23, 0.78) !important;
+}
+
+.dark-theme .edit-modal {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55) !important;
+}
+
+.dark-theme .edit-modal h4,
+.dark-theme .edit-modal label {
+  color: #e2e8f0 !important;
+}
+
+.dark-theme .edit-modal .validation-text {
+  color: #fca5a5 !important;
+}
+
+.dark-theme .edit-modal .form-control,
+.dark-theme .edit-modal input,
+.dark-theme .edit-modal textarea {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.dark-theme .edit-modal .form-control:focus,
+.dark-theme .edit-modal input:focus,
+.dark-theme .edit-modal textarea:focus {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18) !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.dark-theme .edit-modal .billing-select {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.dark-theme .edit-modal .billing-select:focus {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18) !important;
+  -webkit-text-fill-color: #f8fafc !important;
+}
+
+.dark-theme .edit-modal .billing-select option {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+.dark-theme .edit-modal .btn-secondary {
+  background: #475569 !important;
+  border-color: #475569 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .edit-modal .btn-secondary:hover {
+  background: #334155 !important;
+  border-color: #334155 !important;
+}
+
+.dark-theme .edit-modal .btn-success {
+  background: #15803d !important;
+  border-color: #15803d !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .edit-modal .btn-success:hover {
+  background: #166534 !important;
+  border-color: #166534 !important;
+}
+/* ===== FORCE DARK MODE FOR BILLING MODALS ===== */
+
+.dark-theme .edit-modal-overlay {
+  background: rgba(2, 6, 23, 0.78) !important;
+}
+
+.dark-theme .edit-modal {
+  background: #0f172a !important;
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.55) !important;
+}
+
+.dark-theme .edit-modal h4,
+.dark-theme .edit-modal h5,
+.dark-theme .edit-modal label {
+  color: #e2e8f0 !important;
+}
+
+.dark-theme .edit-modal .validation-text,
+.dark-theme .edit-modal .text-danger {
+  color: #fca5a5 !important;
+}
+
+.dark-theme .edit-modal .form-control,
+.dark-theme .edit-modal input,
+.dark-theme .edit-modal textarea,
+.dark-theme .edit-modal select {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  box-shadow: none !important;
+}
+
+.dark-theme .edit-modal .form-control::placeholder,
+.dark-theme .edit-modal input::placeholder,
+.dark-theme .edit-modal textarea::placeholder {
+  color: #94a3b8 !important;
+  -webkit-text-fill-color: #94a3b8 !important;
+}
+
+.dark-theme .edit-modal .form-control:focus,
+.dark-theme .edit-modal input:focus,
+.dark-theme .edit-modal textarea:focus,
+.dark-theme .edit-modal select:focus {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #60a5fa !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18) !important;
+  outline: none !important;
+}
+
+.dark-theme .edit-modal textarea {
+  resize: vertical !important;
+  min-height: 96px !important;
+}
+
+.dark-theme .edit-modal .billing-select {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #475569 !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+}
+
+.dark-theme .edit-modal .billing-select:focus {
+  background: #1e293b !important;
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: #60a5fa !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.18) !important;
+}
+
+.dark-theme .edit-modal .billing-select option {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+.dark-theme .edit-modal .btn {
+  box-shadow: none !important;
+}
+
+.dark-theme .edit-modal .btn-secondary {
+  background: #475569 !important;
+  background-color: #475569 !important;
+  border-color: #475569 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .edit-modal .btn-secondary:hover,
+.dark-theme .edit-modal .btn-secondary:focus {
+  background: #334155 !important;
+  background-color: #334155 !important;
+  border-color: #334155 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .edit-modal .btn-success {
+  background: #15803d !important;
+  background-color: #15803d !important;
+  border-color: #15803d !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .edit-modal .btn-success:hover,
+.dark-theme .edit-modal .btn-success:focus {
+  background: #166534 !important;
+  background-color: #166534 !important;
+  border-color: #166534 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .edit-modal .btn-success:disabled,
+.dark-theme .edit-modal .btn-secondary:disabled {
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
+}

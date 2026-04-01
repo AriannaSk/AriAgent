@@ -1,0 +1,48 @@
+.compact-reading-card {
+  padding: 22px;
+}
+
+.compact-header {
+  margin-bottom: 14px;
+}
+
+.compact-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 18px;
+}
+
+.usage-summary-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.usage-pill {
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #f8fbff;
+  border: 1px solid #dbeafe;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.usage-pill strong {
+  color: var(--text);
+}
+
+.compact-actions {
+  margin-top: 18px;
+}
+
+@media (max-width: 900px) {
+  .compact-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .usage-summary-row {
+    flex-direction: column;
+  }
+}

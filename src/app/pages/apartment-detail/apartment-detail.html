@@ -1,0 +1,463 @@
+<div class="container apartment-detail-page mt-5">
+  <div class="row justify-content-center">
+    <div class="col-xl-10 col-lg-11">
+
+      <div *ngIf="apartment() as ap">
+
+        <!-- PAGE HEADER -->
+        <div class="mb-4">
+          <div class="breadcrumb-line mb-2">
+            <button type="button" class="breadcrumb-btn" (click)="goBack()">
+              ← Back to house
+            </button>
+          </div>
+
+          <h2 class="page-title mb-1">
+            {{ ap.id ? ('Apartment ' + ap.numurs) : 'New Apartment' }}
+          </h2>
+
+          <p class="page-subtitle mb-1">
+            Edit apartment details and manage residents
+          </p>
+
+          <div class="apartment-meta">
+            Floor: {{ ap.stavs || 0 }} ·
+            Rooms: {{ ap.istabuSkaits || 0 }} ·
+            Living area: {{ ap.dzivojamaPlatiba || 0 }} m² ·
+            Residents: {{ ap.iedzivotaji.length || 0 }}
+          </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="summary-row mb-3">
+          <div class="summary-item">
+            <span class="summary-label">Residents</span>
+            <span class="summary-value">{{ ap.iedzivotaji.length || 0 }}</span>
+          </div>
+        </div>
+
+        <!-- APARTMENT FORM -->
+        <div class="card apartment-card mb-4">
+          <div class="card-header apartment-header">
+            <div>
+              <h5 class="mb-0">
+                {{ ap.id ? 'Edit Apartment' : 'New Apartment' }}
+              </h5>
+              <div class="header-subtext">
+                Update apartment information
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <form #apartmentForm="ngForm">
+              <div class="row g-4">
+
+                <!-- NUMBER -->
+                <div class="col-md-6">
+                  <label class="form-label">Number</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="numurs"
+                    [(ngModel)]="ap.numurs"
+                    required
+                    min="1"
+                    step="1"
+                    pattern="^[0-9]+$"
+                    #numurs="ngModel"
+                    [class.is-invalid]="(numurs.invalid && numurs.touched) || apartmentNumberInvalid(ap)"
+                    (keydown)="allowOnlyWholeNumbers($event)"
+                    (input)="normalizeIntegerField(ap, 'numurs')"
+                    placeholder="Example: 12">
+
+                  <div class="text-danger validation-text" *ngIf="numurs.errors?.['required'] && numurs.touched">
+                    Apartment number is required
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="!numurs.errors?.['required'] && (numurs.errors?.['min'] || numurs.errors?.['pattern']) && numurs.touched">
+                    Apartment number must be a whole number greater than 0
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="apartmentNumberInvalid(ap) && numurs.touched">
+                    Apartment number must be a whole number greater than 0
+                  </div>
+                </div>
+
+                <!-- FLOOR -->
+                <div class="col-md-6">
+                  <label class="form-label">Floor</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="stavs"
+                    [(ngModel)]="ap.stavs"
+                    required
+                    min="0"
+                    step="1"
+                    pattern="^[0-9]+$"
+                    #stavs="ngModel"
+                    [class.is-invalid]="(stavs.invalid && stavs.touched) || floorInvalid(ap)"
+                    (keydown)="allowOnlyWholeNumbers($event)"
+                    (input)="normalizeIntegerField(ap, 'stavs')"
+                    placeholder="Example: 2">
+
+                  <div class="text-danger validation-text" *ngIf="stavs.errors?.['required'] && stavs.touched">
+                    Floor is required
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="!stavs.errors?.['required'] && (stavs.errors?.['min'] || stavs.errors?.['pattern']) && stavs.touched">
+                    Floor must be a whole number 0 or greater
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="floorInvalid(ap) && stavs.touched">
+                    Floor must be a whole number 0 or greater
+                  </div>
+                </div>
+
+                <!-- ROOMS -->
+                <div class="col-md-6">
+                  <label class="form-label">Rooms</label>
+                  <input
+                    type="number"
+                    class="form-control"
+                    name="rooms"
+                    [(ngModel)]="ap.istabuSkaits"
+                    required
+                    min="1"
+                    step="1"
+                    pattern="^[0-9]+$"
+                    #rooms="ngModel"
+                    [class.is-invalid]="(rooms.invalid && rooms.touched) || roomsInvalid(ap)"
+                    (keydown)="allowOnlyWholeNumbers($event)"
+                    (input)="normalizeIntegerField(ap, 'istabuSkaits')"
+                    placeholder="Example: 3">
+
+                  <div class="text-danger validation-text" *ngIf="rooms.errors?.['required'] && rooms.touched">
+                    Rooms are required
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="!rooms.errors?.['required'] && (rooms.errors?.['min'] || rooms.errors?.['pattern']) && rooms.touched">
+                    Rooms must be a whole number at least 1
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="roomsInvalid(ap) && rooms.touched">
+                    Rooms must be a whole number at least 1
+                  </div>
+                </div>
+
+                <!-- FULL AREA -->
+                <div class="col-md-6">
+                  <label class="form-label">Full Area</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    name="pilnaPlatiba"
+                    [(ngModel)]="ap.pilnaPlatiba"
+                    required
+                    min="0.01"
+                    #pilnaPlatiba="ngModel"
+                    [class.is-invalid]="(pilnaPlatiba.invalid && pilnaPlatiba.touched) || fullAreaInvalid(ap) || areaRelationInvalid(ap)"
+                    (input)="normalizeDecimalField(ap, 'pilnaPlatiba')"
+                    placeholder="Example: 75.50">
+
+                  <div class="text-danger validation-text" *ngIf="pilnaPlatiba.errors?.['required'] && pilnaPlatiba.touched">
+                    Full area is required
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="!pilnaPlatiba.errors?.['required'] && pilnaPlatiba.errors?.['min'] && pilnaPlatiba.touched">
+                    Full area must be greater than 0
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="fullAreaInvalid(ap) && pilnaPlatiba.touched">
+                    Full area must be greater than 0
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="areaRelationInvalid(ap) && (pilnaPlatiba.touched || dzivojamaPlatiba.touched)">
+                    Full area cannot be less than living area
+                  </div>
+                </div>
+
+                <!-- LIVING AREA -->
+                <div class="col-md-6">
+                  <label class="form-label">Living Area</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    class="form-control"
+                    name="dzivojamaPlatiba"
+                    [(ngModel)]="ap.dzivojamaPlatiba"
+                    required
+                    min="0.01"
+                    #dzivojamaPlatiba="ngModel"
+                    [class.is-invalid]="(dzivojamaPlatiba.invalid && dzivojamaPlatiba.touched) || livingAreaInvalid(ap) || areaRelationInvalid(ap)"
+                    (input)="normalizeDecimalField(ap, 'dzivojamaPlatiba')"
+                    placeholder="Example: 48.20">
+
+                  <div class="text-danger validation-text" *ngIf="dzivojamaPlatiba.errors?.['required'] && dzivojamaPlatiba.touched">
+                    Living area is required
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="!dzivojamaPlatiba.errors?.['required'] && dzivojamaPlatiba.errors?.['min'] && dzivojamaPlatiba.touched">
+                    Living area must be greater than 0
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="livingAreaInvalid(ap) && dzivojamaPlatiba.touched">
+                    Living area must be greater than 0
+                  </div>
+
+                  <div class="text-danger validation-text" *ngIf="areaRelationInvalid(ap) && (dzivojamaPlatiba.touched || pilnaPlatiba.touched)">
+                    Living area cannot be greater than full area
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="form-actions mt-4">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  (click)="save()"
+                  [disabled]="apartmentForm.invalid || apartmentBusinessInvalid(ap)">
+                  Save changes
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="goBack()">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- RESIDENTS -->
+        <div class="card apartment-card">
+          <div class="card-header apartment-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <h5 class="mb-0">Residents</h5>
+              <div class="header-subtext">
+                People registered in this apartment
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-success btn-sm"
+              (click)="addResident()"
+              [disabled]="!ap.id">
+              + Add Resident
+            </button>
+          </div>
+
+          <div class="card-body">
+
+            <div *ngIf="!ap.id" class="resident-note mb-3">
+              Save apartment first before adding residents.
+            </div>
+
+            <div *ngIf="ap.iedzivotaji && ap.iedzivotaji.length > 0" class="resident-list">
+
+              <div
+                class="resident-card mb-3"
+                *ngFor="let r of ap.iedzivotaji">
+
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                  <div class="resident-main">
+                    <h6 class="resident-name mb-3">
+                      {{ r.vards }} {{ r.uzvards }}
+                    </h6>
+
+                    <div class="resident-info-grid">
+                      <div class="resident-info-item">
+                        <span class="resident-info-label">Personal code</span>
+                        <span class="resident-info-value">{{ r.personasKods || '-' }}</span>
+                      </div>
+
+                      <div class="resident-info-item">
+                        <span class="resident-info-label">Phone</span>
+                        <span class="resident-info-value">{{ r.telefons || '-' }}</span>
+                      </div>
+
+                      <div class="resident-info-item">
+                        <span class="resident-info-label">Email</span>
+                        <span class="resident-info-value">{{ r.epasts || '-' }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="d-flex gap-2 flex-shrink-0 resident-actions">
+                    <button
+                      class="btn btn-sm btn-outline-primary"
+                      (click)="editResident(r)">
+                      Edit
+                    </button>
+
+                    <button
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="deleteResident(r.id)">
+                      Delete
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+            <div
+              *ngIf="!ap.iedzivotaji || ap.iedzivotaji.length === 0"
+              class="text-muted py-2">
+              No residents added yet
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Resident Modal -->
+<div class="modal fade" id="residentModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content resident-modal">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          {{ !selectedResident?.id ? 'Add Resident' : 'Edit Resident' }}
+        </h5>
+
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal">
+        </button>
+      </div>
+
+      <div class="modal-body" *ngIf="selectedResident">
+
+        <!-- NAME -->
+        <div class="mb-3">
+          <label class="form-label">Name</label>
+          <input
+            class="form-control"
+            [(ngModel)]="selectedResident.vards"
+            name="residentName"
+            [class.is-invalid]="residentFieldTouched.name && !!residentErrors.name"
+            [attr.title]="residentFieldTouched.name && residentErrors.name ? residentErrors.name : null"
+            (input)="validateResidentField('name')"
+            (blur)="touchResidentField('name'); validateResidentField('name')"
+            (keydown)="allowOnlyLetters($event)"
+            placeholder="Example: Anna">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.name && residentErrors.name">
+            {{ residentErrors.name }}
+          </div>
+        </div>
+
+        <!-- SURNAME -->
+        <div class="mb-3">
+          <label class="form-label">Surname</label>
+          <input
+            class="form-control"
+            [(ngModel)]="selectedResident.uzvards"
+            name="residentSurname"
+            [class.is-invalid]="residentFieldTouched.surname && !!residentErrors.surname"
+            [attr.title]="residentFieldTouched.surname && residentErrors.surname ? residentErrors.surname : null"
+            (input)="validateResidentField('surname')"
+            (blur)="touchResidentField('surname'); validateResidentField('surname')"
+            (keydown)="allowOnlyLetters($event)"
+            placeholder="Example: Ozolina">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.surname && residentErrors.surname">
+            {{ residentErrors.surname }}
+          </div>
+        </div>
+
+        <!-- PERSONAL CODE -->
+        <div class="mb-3">
+          <label class="form-label">Personal Code</label>
+          <input
+            class="form-control"
+            [(ngModel)]="selectedResident.personasKods"
+            name="personasKods"
+            [class.is-invalid]="residentFieldTouched.personalCode && !!residentErrors.personalCode"
+            [attr.title]="residentFieldTouched.personalCode && residentErrors.personalCode ? residentErrors.personalCode : null"
+            (input)="validateResidentField('personalCode')"
+            (blur)="touchResidentField('personalCode'); validateResidentField('personalCode')"
+            placeholder="Example: 123456-12345">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.personalCode && residentErrors.personalCode">
+            {{ residentErrors.personalCode }}
+          </div>
+        </div>
+
+        <!-- PHONE -->
+        <div class="mb-3">
+          <label class="form-label">Phone</label>
+          <input
+            class="form-control"
+            [(ngModel)]="selectedResident.telefons"
+            name="telefons"
+            [class.is-invalid]="residentFieldTouched.phone && !!residentErrors.phone"
+            [attr.title]="residentFieldTouched.phone && residentErrors.phone ? residentErrors.phone : null"
+            (input)="validateResidentField('phone')"
+            (blur)="touchResidentField('phone'); validateResidentField('phone')"
+            placeholder="Example: +37120000000">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.phone && residentErrors.phone">
+            {{ residentErrors.phone }}
+          </div>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input
+            class="form-control"
+            [(ngModel)]="selectedResident.epasts"
+            name="epasts"
+            [class.is-invalid]="residentFieldTouched.email && !!residentErrors.email"
+            [attr.title]="residentFieldTouched.email && residentErrors.email ? residentErrors.email : null"
+            (input)="validateResidentField('email')"
+            (blur)="touchResidentField('email'); validateResidentField('email')"
+            placeholder="Example: anna@email.com">
+          <div class="text-danger validation-text" *ngIf="residentFieldTouched.email && residentErrors.email">
+            {{ residentErrors.email }}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer d-flex justify-content-between">
+        <button
+          type="button"
+          class="btn btn-danger"
+          *ngIf="selectedResident?.id"
+          (click)="deleteResident(selectedResident.id)">
+          Delete
+        </button>
+
+        <div class="d-flex gap-2 ms-auto">
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            data-bs-dismiss="modal">
+            Cancel
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="saveResident()"
+            [disabled]="residentFormInvalid()">
+            Save
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
