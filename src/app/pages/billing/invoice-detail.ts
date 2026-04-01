@@ -10,7 +10,7 @@ import { HouseService, House } from '../../services/house';
 import { AuthService } from '../../services/auth.service';
 import {
   BillingInputService,
-  BillingInputReadDto,
+  BillingInput,
   BillingInputSaveDto
 } from '../../services/billing-input.service';
 
@@ -56,7 +56,7 @@ export class InvoiceDetail implements OnInit {
   readonly apartment = signal<ApartmentInfo | null>(null);
   readonly house = signal<House | null>(null);
   readonly services = signal<Service[]>([]);
-  readonly billingInput = signal<BillingInputReadDto | null>(null);
+  readonly billingInput = signal<BillingInput | null>(null);
 
   editForm = {
     waterM3: 0,
@@ -117,7 +117,9 @@ export class InvoiceDetail implements OnInit {
         baseAmount = livingArea * tariff;
         baseValueText = `${livingArea} × ${tariff.toFixed(2)}`;
       } else if (formula === 'residents * tariff') {
-        const residents = Number(input?.residentsCount ?? this.getApartmentResidentsBase(apartment)) || 0;
+        const residents = Number(
+          input?.residentsCount ?? this.getApartmentResidentsBase(apartment)
+        ) || 0;
         formulaLabel = 'Residents count × tariff';
         baseAmount = residents * tariff;
         baseValueText = `${residents} × ${tariff.toFixed(2)}`;
@@ -151,7 +153,7 @@ export class InvoiceDetail implements OnInit {
         baseValueText = '-';
       }
 
-      const taxAmount = baseAmount * taxPercent / 100;
+      const taxAmount = (baseAmount * taxPercent) / 100;
       const totalAmount = baseAmount + taxAmount;
 
       return {
@@ -265,7 +267,7 @@ export class InvoiceDetail implements OnInit {
         this.apartment.set(apartmentData);
 
         this.billingInputService.getByApartmentAndPeriod(apartmentId, period).subscribe({
-          next: (existingInput) => {
+          next: (existingInput: BillingInput) => {
             this.billingInput.set(existingInput);
 
             this.editForm = {
@@ -315,10 +317,16 @@ export class InvoiceDetail implements OnInit {
     const input = this.billingInput();
     const apartment = this.apartment();
 
+    if (this.auth.isResident() && !this.isOwnApartment(apartment)) {
+      this.error.set('You cannot edit this invoice');
+      return;
+    }
+
     this.editForm = {
       waterM3: Number(input?.waterM3) || 0,
       electricityKwh: Number(input?.electricityKwh) || 0,
-      residentsCount: Number(input?.residentsCount ?? (apartment ? this.getApartmentResidentsBase(apartment) : 0)) || 0
+      residentsCount:
+        Number(input?.residentsCount ?? (apartment ? this.getApartmentResidentsBase(apartment) : 0)) || 0
     };
 
     this.success.set('');
@@ -334,8 +342,14 @@ export class InvoiceDetail implements OnInit {
 
   saveBillingChanges(): void {
     const invoice = this.invoice();
+    const apartment = this.apartment();
 
-    if (!invoice) return;
+    if (!invoice || !apartment) return;
+
+    if (this.auth.isResident() && !this.isOwnApartment(apartment)) {
+      this.error.set('You cannot edit this invoice');
+      return;
+    }
 
     this.saving.set(true);
     this.error.set('');
@@ -346,7 +360,9 @@ export class InvoiceDetail implements OnInit {
       period: invoice.period,
       waterM3: Number(this.editForm.waterM3) || 0,
       electricityKwh: Number(this.editForm.electricityKwh) || 0,
-      residentsCount: Number(this.editForm.residentsCount) || 0,
+      residentsCount: this.auth.isResident()
+        ? this.getApartmentResidentsBase(apartment)
+        : Number(this.editForm.residentsCount) || 0,
       comment: ''
     };
 
@@ -354,15 +370,26 @@ export class InvoiceDetail implements OnInit {
       next: (result) => {
         if (result?.billingInput) {
           this.billingInput.set(result.billingInput);
+
+          this.editForm = {
+            waterM3: Number(result.billingInput.waterM3) || 0,
+            electricityKwh: Number(result.billingInput.electricityKwh) || 0,
+            residentsCount: Number(result.billingInput.residentsCount) || 0
+          };
         }
 
         if (result?.invoice) {
           this.invoice.set(result.invoice);
         }
 
-        this.success.set('Billing data updated successfully');
-        this.editMode.set(false);
         this.saving.set(false);
+        this.editMode.set(false);
+        this.success.set('Billing data updated successfully');
+
+        const invoiceId = result?.invoice?.id ?? invoice.id;
+        if (invoiceId) {
+          this.loadInvoice(String(invoiceId));
+        }
       },
       error: (err: any) => {
         console.error(err);
@@ -396,6 +423,11 @@ export class InvoiceDetail implements OnInit {
   }
 
   goBack(): void {
+    if (this.auth.isManager()) {
+      this.router.navigate(['/manager/billing']);
+      return;
+    }
+
     this.router.navigate(['/resident/invoices']);
   }
 

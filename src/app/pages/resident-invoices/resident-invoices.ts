@@ -130,9 +130,14 @@ export class ResidentInvoicesComponent implements OnInit {
 
     this.invoiceService.getMyInvoicesByApartment(this.selectedApartmentId).subscribe({
       next: (data: Invoice[]) => {
-        const sorted = [...(data ?? [])].sort((a, b) =>
+        const filtered = (data ?? []).filter(
+          x => !this.selectedPeriod || x.period === this.selectedPeriod
+        );
+
+        const sorted = [...filtered].sort((a, b) =>
           (b.period || '').localeCompare(a.period || '')
         );
+
         this.invoices.set(sorted);
       },
       error: (err: unknown) => {
@@ -152,9 +157,9 @@ export class ResidentInvoicesComponent implements OnInit {
       .subscribe({
         next: (data) => {
           this.billingForm.set({
-            waterM3: Number(data.waterM3),
-            electricityKwh: Number(data.electricityKwh),
-            residentsCount: Number(data.residentsCount)
+            waterM3: Number(data.waterM3) || 0,
+            electricityKwh: Number(data.electricityKwh) || 0,
+            residentsCount: Number(data.residentsCount) || 0
           });
         },
         error: () => {
@@ -253,25 +258,9 @@ export class ResidentInvoicesComponent implements OnInit {
     };
 
     this.billingInputService.save(dto).subscribe({
-      next: (result) => {
-        const returnedInvoice = result?.invoice;
-
-        if (returnedInvoice) {
-          const existing = this.invoices().find(x => x.id === returnedInvoice.id);
-
-          if (existing) {
-            this.invoices.set(
-              this.invoices()
-                .map(x => x.id === returnedInvoice.id ? returnedInvoice : x)
-                .sort((a, b) => (b.period || '').localeCompare(a.period || ''))
-            );
-          } else {
-            this.invoices.set(
-              [...this.invoices(), returnedInvoice]
-                .sort((a, b) => (b.period || '').localeCompare(a.period || ''))
-            );
-          }
-        }
+      next: () => {
+        this.loadExistingBillingInput();
+        this.loadInvoicesForSelectedApartment();
 
         this.success.set('Billing data and invoice saved successfully');
         this.saving.set(false);
@@ -328,7 +317,6 @@ export class ResidentInvoicesComponent implements OnInit {
     const electricity = Number(form.electricityKwh ?? 0);
     const residents = Number(form.residentsCount ?? 0);
     const livingArea = Number(apartment?.dzivojamaPlatiba ?? 0);
-    const loggiaArea = Number(apartment?.lodzijasPlatiba ?? 0);
 
     return this.services().map((service: Service) => {
       const formula = String(service.formula ?? '').trim().toLowerCase();
@@ -344,12 +332,12 @@ export class ResidentInvoicesComponent implements OnInit {
         formulaLabel = 'Tariff';
         baseAmount = tariff;
         baseValueText = `Tariff ${tariff.toFixed(2)}`;
-      }  else if (formula === 'maintenance') {
-      const fullArea = Number(apartment?.pilnaPlatiba ?? 0);
-      formulaLabel = 'Full area × tariff';
-      baseAmount = fullArea * tariff;
-      baseValueText = `${fullArea} × ${tariff.toFixed(2)}`;
-      }else if (formula === 'residents * tariff') {
+      } else if (formula === 'maintenance') {
+        const fullArea = Number(apartment?.pilnaPlatiba ?? 0);
+        formulaLabel = 'Full area × tariff';
+        baseAmount = fullArea * tariff;
+        baseValueText = `${fullArea} × ${tariff.toFixed(2)}`;
+      } else if (formula === 'residents * tariff') {
         formulaLabel = 'Residents count × tariff';
         baseAmount = residents * tariff;
         baseValueText = `${residents} × ${tariff.toFixed(2)}`;
@@ -358,11 +346,20 @@ export class ResidentInvoicesComponent implements OnInit {
         baseAmount = livingArea * tariff;
         baseValueText = `${livingArea} × ${tariff.toFixed(2)}`;
       } else if (formula === 'usage * tariff') {
-        if (service.type === 4 || name.toLowerCase().includes('water') || name.toLowerCase().includes('ūdens') || name.toLowerCase().includes('udens')) {
+        if (
+          service.type === 4 ||
+          name.toLowerCase().includes('water') ||
+          name.toLowerCase().includes('ūdens') ||
+          name.toLowerCase().includes('udens')
+        ) {
           formulaLabel = 'Water m³ × tariff';
           baseAmount = water * tariff;
           baseValueText = `${water} × ${tariff.toFixed(2)}`;
-        } else if (service.type === 0 || name.toLowerCase().includes('electric') || name.toLowerCase().includes('elektr')) {
+        } else if (
+          service.type === 0 ||
+          name.toLowerCase().includes('electric') ||
+          name.toLowerCase().includes('elektr')
+        ) {
           formulaLabel = 'Electricity kWh × tariff';
           baseAmount = electricity * tariff;
           baseValueText = `${electricity} × ${tariff.toFixed(2)}`;

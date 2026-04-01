@@ -2,10 +2,16 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { catchError, firstValueFrom, of } from 'rxjs';
 
 import { InvoiceService, Invoice } from './invoice.service';
-import { ServiceService, Service } from '../../services/service.service';
+import {
+  BillingInputService,
+  BillingInputSaveDto,
+  BillingInput
+} from '../../services/billing-input.service';
 
+import { ServiceService, Service } from '../../services/service.service';
 import { ApartmentService } from '../../services/apartment.service';
 import { HouseService, House } from '../../services/house';
 import { AuthService } from '../../services/auth.service';
@@ -99,13 +105,12 @@ export class HouseBilling implements OnInit {
     { value: 'usage * tariff', label: 'Usage × tariff' }
   ];
 
-  private readonly billingStorageKey = 'billing-inputs';
-
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     public auth: AuthService,
     private invoiceService: InvoiceService,
+    private billingInputService: BillingInputService,
     private serviceService: ServiceService,
     private apartmentService: ApartmentService,
     private houseService: HouseService
@@ -218,6 +223,47 @@ export class HouseBilling implements OnInit {
         (!!currentEmail && residentEmail === currentEmail)
       );
     });
+  }
+
+  private mapBillingInputToLocal(input: BillingInput): BillingInputLocal {
+    return {
+      apartmentId: input.apartmentId,
+      period: input.period,
+      waterM3: Number(input.waterM3) || 0,
+      electricityKwh: Number(input.electricityKwh) || 0,
+      residentsCount: Number(input.residentsCount) || 0,
+      comment: input.comment ?? ''
+    };
+  }
+
+  private upsertInvoiceState(invoice: Invoice): void {
+    this.invoices.update(current => {
+      const filtered = current.filter(
+        x => !(x.apartmentId === invoice.apartmentId && x.period === invoice.period)
+      );
+
+      return [...filtered, invoice].sort((a, b) =>
+        (b.period || '').localeCompare(a.period || '')
+      );
+    });
+  }
+
+  private buildInvoicePayload(apartmentId: string): Invoice | null {
+    const apartment = this.getApartment(apartmentId);
+    if (!apartment) {
+      return null;
+    }
+
+    const existing = this.getInvoiceForApartment(apartmentId);
+
+    return {
+      id: existing?.id,
+      apartmentId,
+      period: this.selectedPeriod(),
+      invoiceIdentifier:
+        existing?.invoiceIdentifier ?? `INV-${this.selectedPeriod()}-${apartment.numurs}`,
+      total: this.calculateInvoiceTotalForApartment(apartmentId)
+    };
   }
 
   loadHouses(): void {
@@ -371,6 +417,34 @@ export class HouseBilling implements OnInit {
     });
   }
 
+  loadBillingInputs(): void {
+    const apartmentIds = this.apartments().map(a => a.id);
+    const period = this.selectedPeriod();
+
+    if (apartmentIds.length === 0) {
+      this.billingInputs.set([]);
+      return;
+    }
+
+    this.billingInputService.getAll().subscribe({
+      next: (data: BillingInput[]) => {
+        const filtered = (data ?? [])
+          .filter(x =>
+            x.period === period &&
+            !!x.apartmentId &&
+            apartmentIds.includes(x.apartmentId)
+          )
+          .map(x => this.mapBillingInputToLocal(x));
+
+        this.billingInputs.set(filtered);
+      },
+      error: (err: any) => {
+        console.error('LOAD BILLING INPUTS ERROR:', err);
+        this.billingInputs.set([]);
+      }
+    });
+  }
+
   getCurrentMonth(): string {
     const now = new Date();
     const year = now.getFullYear();
@@ -438,37 +512,6 @@ export class HouseBilling implements OnInit {
       return sum + (inv?.total ?? 0);
     }, 0)
   );
-
-  private readAllBillingInputsFromStorage(): BillingInputLocal[] {
-    try {
-      const raw = localStorage.getItem(this.billingStorageKey);
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private writeAllBillingInputsToStorage(items: BillingInputLocal[]): void {
-    localStorage.setItem(this.billingStorageKey, JSON.stringify(items));
-  }
-
-  loadBillingInputs(): void {
-    const apartmentIds = this.apartments().map(a => a.id);
-    const period = this.selectedPeriod();
-
-    if (apartmentIds.length === 0) {
-      this.billingInputs.set([]);
-      return;
-    }
-
-    const all = this.readAllBillingInputsFromStorage();
-    const filtered = all.filter(x =>
-      x.period === period &&
-      apartmentIds.includes(x.apartmentId)
-    );
-
-    this.billingInputs.set(filtered);
-  }
 
   getBillingInputForApartment(apartmentId: string): BillingInputLocal | undefined {
     return this.billingInputs().find(x =>
@@ -571,27 +614,50 @@ export class HouseBilling implements OnInit {
       return;
     }
 
-    const normalized: BillingInputLocal = {
+    const dto: BillingInputSaveDto = {
       apartmentId: item.apartmentId,
       period: item.period,
-      waterM3: Number(item.waterM3),
-      electricityKwh: Number(item.electricityKwh),
+      waterM3: Number(item.waterM3) || 0,
+      electricityKwh: Number(item.electricityKwh) || 0,
       residentsCount: this.auth.isResident()
         ? this.getApartmentResidentsBase(item.apartmentId)
-        : Number(item.residentsCount),
+        : Number(item.residentsCount) || 0,
       comment: (item.comment ?? '').trim()
     };
 
-    const all = this.readAllBillingInputsFromStorage();
-    const filtered = all.filter(x =>
-      !(x.apartmentId === normalized.apartmentId && x.period === normalized.period)
-    );
+    this.billingInputService.save(dto).subscribe({
+      next: (result) => {
+        const normalized: BillingInputLocal = {
+          apartmentId: dto.apartmentId,
+          period: dto.period,
+          waterM3: dto.waterM3,
+          electricityKwh: dto.electricityKwh,
+          residentsCount: dto.residentsCount,
+          comment: dto.comment ?? ''
+        };
 
-    filtered.push(normalized);
-    this.writeAllBillingInputsToStorage(filtered);
-    this.loadBillingInputs();
-    this.closeBillingInputModal();
-    this.message.set('Billing data saved successfully');
+        this.billingInputs.update(current => {
+          const filtered = current.filter(
+            x => !(x.apartmentId === normalized.apartmentId && x.period === normalized.period)
+          );
+          return [...filtered, normalized];
+        });
+
+        if (result?.invoice) {
+          this.upsertInvoiceState(result.invoice);
+        }
+
+        this.closeBillingInputModal();
+        this.message.set('Billing data saved successfully');
+
+        this.loadBillingInputs();
+        this.loadInvoices();
+      },
+      error: (err: any) => {
+        console.error('SAVE BILLING INPUT ERROR:', err);
+        this.message.set(err?.error?.message || 'Failed to save billing data');
+      }
+    });
   }
 
   getInvoiceForApartment(apartmentId: string): Invoice | undefined {
@@ -605,7 +671,11 @@ export class HouseBilling implements OnInit {
     return formula.trim().toLowerCase();
   }
 
-  calculateServiceAmount(service: Service, apartment: ApartmentInfo, input: BillingInputLocal | undefined): number {
+  calculateServiceAmount(
+    service: Service,
+    apartment: ApartmentInfo,
+    input: BillingInputLocal | undefined
+  ): number {
     const formula = this.resolveFormulaKey(service.formula);
     const tariff = Number(service.tarifs) || 0;
     const serviceName = (service.nosaukums ?? '').trim().toLowerCase();
@@ -619,11 +689,16 @@ export class HouseBilling implements OnInit {
     }
 
     if (formula === 'maintenance') {
-      return ((Number(apartment.dzivojamaPlatiba) || 0) + (Number(apartment.lodzijasPlatiba) || 0)) * tariff;
+      return (
+        ((Number(apartment.dzivojamaPlatiba) || 0) +
+          (Number(apartment.lodzijasPlatiba) || 0)) *
+        tariff
+      );
     }
 
     if (formula === 'residents * tariff') {
-      const residentsCount = Number(input?.residentsCount ?? this.getApartmentResidentsBase(apartment.id)) || 0;
+      const residentsCount =
+        Number(input?.residentsCount ?? this.getApartmentResidentsBase(apartment.id)) || 0;
       return residentsCount * tariff;
     }
 
@@ -651,7 +726,7 @@ export class HouseBilling implements OnInit {
     const total = this.services().reduce((sum, service) => {
       const baseAmount = this.calculateServiceAmount(service, apartment, input);
       const tax = Number(service.nodoklis) || 0;
-      const amountWithTax = baseAmount + (baseAmount * tax / 100);
+      const amountWithTax = baseAmount + (baseAmount * tax) / 100;
       return sum + amountWithTax;
     }, 0);
 
@@ -672,7 +747,6 @@ export class HouseBilling implements OnInit {
 
   canGenerateInvoice(apartmentId: string): boolean {
     if (!this.auth.isManager()) return false;
-    if (this.getInvoiceForApartment(apartmentId)) return false;
     if (this.services().length === 0) return false;
     return !!this.getBillingInputForApartment(apartmentId);
   }
@@ -680,11 +754,6 @@ export class HouseBilling implements OnInit {
   generateInvoiceForApartment(apartmentId: string): void {
     if (!this.auth.isManager()) {
       this.message.set('Only manager can generate invoices');
-      return;
-    }
-
-    if (this.getInvoiceForApartment(apartmentId)) {
-      this.message.set('Invoice for this period already exists');
       return;
     }
 
@@ -699,25 +768,30 @@ export class HouseBilling implements OnInit {
       return;
     }
 
-    const apartment = this.getApartment(apartmentId);
-    if (!apartment) return;
+    const existing = this.getInvoiceForApartment(apartmentId);
+    const payload = this.buildInvoicePayload(apartmentId);
 
-    const total = this.calculateInvoiceTotalForApartment(apartmentId);
+    if (!payload) {
+      this.message.set('Apartment not found');
+      return;
+    }
 
-    const payload: Invoice = {
-      apartmentId,
-      period: this.selectedPeriod(),
-      invoiceIdentifier: `INV-${this.selectedPeriod()}-${apartment.numurs}`,
-      total
-    };
+    const request$ = existing?.id
+      ? this.invoiceService.update(existing.id, payload)
+      : this.invoiceService.create(payload);
 
-    this.invoiceService.create(payload).subscribe({
-      next: () => {
-        this.message.set('Invoice generated successfully');
+    request$.subscribe({
+      next: (savedInvoice: Invoice) => {
+        this.upsertInvoiceState(savedInvoice);
+        this.message.set(
+          existing?.id
+            ? 'Invoice recalculated successfully'
+            : 'Invoice generated successfully'
+        );
         this.loadInvoices();
       },
       error: (err: any) => {
-        console.error('CREATE INVOICE ERROR:', err);
+        console.error('SAVE INVOICE ERROR:', err);
         this.message.set(err?.error?.message || 'Failed to generate invoice');
       }
     });
@@ -729,19 +803,12 @@ export class HouseBilling implements OnInit {
       return;
     }
 
-    const apartmentsToGenerate = this.filteredApartments().filter(a => !this.getInvoiceForApartment(a.id));
-
-    if (apartmentsToGenerate.length === 0) {
-      this.message.set('All invoices for this period are already generated');
-      return;
-    }
-
     if (this.services().length === 0) {
       this.message.set('Add services before generating invoices');
       return;
     }
 
-    const readyApartments = apartmentsToGenerate.filter(a => this.hasBillingInput(a.id));
+    const readyApartments = this.filteredApartments().filter(a => this.hasBillingInput(a.id));
 
     if (readyApartments.length === 0) {
       this.message.set('Enter billing data before generating invoices');
@@ -752,28 +819,33 @@ export class HouseBilling implements OnInit {
     this.message.set('');
 
     for (const apartment of readyApartments) {
-      const total = this.calculateInvoiceTotalForApartment(apartment.id);
+      const existing = this.getInvoiceForApartment(apartment.id);
+      const payload = this.buildInvoicePayload(apartment.id);
 
-      const payload: Invoice = {
-        apartmentId: apartment.id,
-        period: this.selectedPeriod(),
-        invoiceIdentifier: `INV-${this.selectedPeriod()}-${apartment.numurs}`,
-        total
-      };
+      if (!payload) {
+        continue;
+      }
 
-      await new Promise<void>((resolve) => {
-        this.invoiceService.create(payload).subscribe({
-          next: () => resolve(),
-          error: (err: any) => {
-            console.error('CREATE INVOICE ERROR:', err);
-            resolve();
-          }
-        });
-      });
+      const request$ = existing?.id
+        ? this.invoiceService.update(existing.id, payload)
+        : this.invoiceService.create(payload);
+
+      const savedInvoice = await firstValueFrom(
+        request$.pipe(
+          catchError((err) => {
+            console.error('SAVE INVOICE ERROR:', err);
+            return of(null);
+          })
+        )
+      );
+
+      if (savedInvoice) {
+        this.upsertInvoiceState(savedInvoice);
+      }
     }
 
     this.isGeneratingAll.set(false);
-    this.message.set('Invoices generated successfully');
+    this.message.set('Invoices synchronized successfully');
     this.loadInvoices();
   }
 
@@ -788,13 +860,13 @@ export class HouseBilling implements OnInit {
       return;
     }
 
-        this.editingService.set({
-        nosaukums: '',
-        tarifs: 0,
-        nodoklis: 0,
-        formula: 'fixed',
-        type: 0
-   });
+    this.editingService.set({
+      nosaukums: '',
+      tarifs: 0,
+      nodoklis: 0,
+      formula: 'fixed',
+      type: 0
+    });
 
     this.validateServiceForm();
   }
@@ -840,7 +912,11 @@ export class HouseBilling implements OnInit {
       errors.tarifs = 'Tariff must be 0 or greater';
     }
 
-    if (Number.isNaN(Number(item.nodoklis)) || Number(item.nodoklis) < 0 || Number(item.nodoklis) > 100) {
+    if (
+      Number.isNaN(Number(item.nodoklis)) ||
+      Number(item.nodoklis) < 0 ||
+      Number(item.nodoklis) > 100
+    ) {
       errors.nodoklis = 'Tax must be between 0 and 100';
     }
 
