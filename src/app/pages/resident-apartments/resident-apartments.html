@@ -73,7 +73,7 @@
       <div class="residents-section">
         <h4 class="section-title">Residents</h4>
 
-        <div *ngIf="ap.iedzivotaji?.length; else noResidents" class="residents-list">
+        <div *ngIf="ap.iedzivotaji.length; else noResidents" class="residents-list">
           <div *ngFor="let r of ap.iedzivotaji" class="resident-chip">
             <i class="bi bi-person-circle"></i>
             <span>{{ r.vards }} {{ r.uzvards }}</span>
