@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 
 import { ApartmentService } from '../../services/apartment.service';
 import { HouseService, House } from '../../services/house';
@@ -19,7 +20,6 @@ type ResidentValidationField = 'name' | 'surname' | 'personalCode' | 'phone' | '
   styleUrls: ['./apartments.css']
 })
 export class Apartments implements OnInit {
-
   readonly apartments = signal<Apartment[]>([]);
   readonly loading = signal(true);
   readonly searchTerm = signal('');
@@ -50,24 +50,42 @@ export class Apartments implements OnInit {
     email: false
   };
 
-      constructor(
-        private apartmentService: ApartmentService,
-        private houseService: HouseService,
-        private residentService: ResidentService,
-        public auth: AuthService,
-        private router: Router
-      ) {}
+  constructor(
+    private apartmentService: ApartmentService,
+    private houseService: HouseService,
+    private residentService: ResidentService,
+    public auth: AuthService,
+    private router: Router,
+    private toastr: ToastrService
+  ) {}
 
-      ngOnInit(): void {
-      if (this.auth.isResident()) {
-        this.loadMyApartments();
-      } else {
-        this.loadAllApartments();
-      }
+  ngOnInit(): void {
+    if (this.auth.isResident()) {
+      this.loadMyApartments();
+    } else {
+      this.loadAllApartments();
     }
-    openApartmentDetails(apartment: Apartment): void {
-  this.router.navigate(['/apartment', apartment.id]);
-}
+  }
+
+  private getErrorMessage(err: any, fallback: string): string {
+    if (typeof err?.error === 'string' && err.error.trim()) {
+      return err.error;
+    }
+
+    if (typeof err?.error?.message === 'string' && err.error.message.trim()) {
+      return err.error.message;
+    }
+
+    if (typeof err?.message === 'string' && err.message.trim()) {
+      return err.message;
+    }
+
+    return fallback;
+  }
+
+  openApartmentDetails(apartment: Apartment): void {
+    this.router.navigate(['/apartment', apartment.id]);
+  }
 
   loadAllApartments(): void {
     this.loading.set(true);
@@ -100,7 +118,8 @@ export class Apartments implements OnInit {
                 this.loading.set(false);
               }
             },
-            error: () => {
+            error: (err) => {
+              console.error(err);
               loadedCount++;
 
               if (loadedCount === houses.length) {
@@ -111,30 +130,33 @@ export class Apartments implements OnInit {
           });
         });
       },
-      error: () => {
+      error: (err) => {
+        console.error(err);
         this.loading.set(false);
+        this.toastr.error('Failed to load apartments', 'Error');
       }
     });
   }
-  loadMyApartments(): void {
-  this.loading.set(true);
 
-  this.apartmentService.getMyApartments().subscribe({
-    next: (apartments) => {
-      this.apartments.set(apartments ?? []);
-      this.loading.set(false);
-    },
-    error: (err) => {
-      console.error(err);
-      this.apartments.set([]);
-      this.loading.set(false);
-    }
-  });
-  
-}
+  loadMyApartments(): void {
+    this.loading.set(true);
+
+    this.apartmentService.getMyApartments().subscribe({
+      next: (apartments) => {
+        this.apartments.set(apartments ?? []);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error(err);
+        this.apartments.set([]);
+        this.loading.set(false);
+        this.toastr.error('Failed to load apartments', 'Error');
+      }
+    });
+  }
 
   readonly filteredApartments = computed(() => {
-    const term = this.searchTerm().toLowerCase();
+    const term = this.searchTerm().toLowerCase().trim();
 
     if (!term) return this.apartments();
 
@@ -158,19 +180,15 @@ export class Apartments implements OnInit {
   });
 
   getHouseName(ap: Apartment): string {
+    if ((ap as any).majaNosaukums) {
+      return (ap as any).majaNosaukums;
+    }
 
-  // для resident
-  if ((ap as any).majaNosaukums) {
-    return (ap as any).majaNosaukums;
+    const h = this.housesMap[ap.majaId];
+    if (!h) return 'Unknown house';
+
+    return `${h.iela} ${h.numurs}, ${h.pilseta}`;
   }
-
-  // для manager
-  const h = this.housesMap[ap.majaId];
-
-  if (!h) return 'Unknown house';
-
-  return `${h.iela} ${h.numurs}, ${h.pilseta}`;
-}
 
   getResidentsCount(ap: Apartment): number {
     return ap.iedzivotaji?.length ?? 0;
@@ -195,12 +213,21 @@ export class Apartments implements OnInit {
   confirmDelete(): void {
     if (!this.selectedApartment) return;
 
-    this.apartmentService.delete(this.selectedApartment.id).subscribe(() => {
-      this.apartments.update(list =>
-        list.filter(a => a.id !== this.selectedApartment!.id)
-      );
+    this.apartmentService.delete(this.selectedApartment.id).subscribe({
+      next: () => {
+        this.apartments.update(list =>
+          list.filter(a => a.id !== this.selectedApartment!.id)
+        );
 
-      this.closeDeleteModal();
+        this.toastr.success('Apartment deleted successfully', 'Success');
+        this.closeDeleteModal();
+      },
+      error: (err) => {
+        console.error(err);
+
+        const message = this.getErrorMessage(err, 'Failed to delete apartment');
+        this.toastr.error(message, 'Error');
+      }
     });
   }
 
@@ -320,32 +347,32 @@ export class Apartments implements OnInit {
     if (!ap) return;
 
     if (this.apartmentNumberInvalid(ap)) {
-      alert('Apartment number must be a whole number greater than 0');
+      this.toastr.error('Apartment number must be a whole number greater than 0', 'Validation error');
       return;
     }
 
     if (this.floorInvalid(ap)) {
-      alert('Floor must be a whole number 0 or greater');
+      this.toastr.error('Floor must be a whole number 0 or greater', 'Validation error');
       return;
     }
 
     if (this.roomsInvalid(ap)) {
-      alert('Rooms must be a whole number at least 1');
+      this.toastr.error('Rooms must be a whole number at least 1', 'Validation error');
       return;
     }
 
     if (this.fullAreaInvalid(ap)) {
-      alert('Full area must be greater than 0');
+      this.toastr.error('Full area must be greater than 0', 'Validation error');
       return;
     }
 
     if (this.livingAreaInvalid(ap)) {
-      alert('Living area must be greater than 0');
+      this.toastr.error('Living area must be greater than 0', 'Validation error');
       return;
     }
 
     if (this.areaRelationInvalid(ap)) {
-      alert('Living area cannot be greater than full area');
+      this.toastr.error('Living area cannot be greater than full area', 'Validation error');
       return;
     }
 
@@ -365,10 +392,17 @@ export class Apartments implements OnInit {
       next: () => {
         this.loadAllApartments();
         this.closeEditModal();
+        this.toastr.success('Apartment updated successfully', 'Success');
       },
       error: (err) => {
         console.error(err);
-        alert('Update failed');
+
+        const message = this.getErrorMessage(
+          err,
+          'Apartment with this number already exists in this house.'
+        );
+
+        this.toastr.error(message, 'Error');
       }
     });
   }
@@ -402,11 +436,14 @@ export class Apartments implements OnInit {
 
     this.residentService.delete(id).subscribe({
       next: () => {
+        this.toastr.success('Resident deleted successfully', 'Success');
         this.reloadApartment();
       },
       error: (err) => {
         console.error(err);
-        alert('Delete failed');
+
+        const message = this.getErrorMessage(err, 'Delete failed');
+        this.toastr.error(message, 'Error');
       }
     });
   }
@@ -543,6 +580,7 @@ export class Apartments implements OnInit {
     if (!ap || !this.selectedResident) return;
 
     if (!this.validateAllResidentFields()) {
+      this.toastr.error('Please fix resident form errors before saving', 'Validation error');
       return;
     }
 
@@ -565,26 +603,31 @@ export class Apartments implements OnInit {
     if (this.selectedResident.id) {
       this.residentService.update(this.selectedResident.id, dto).subscribe({
         next: () => {
+          this.toastr.success('Resident updated successfully', 'Success');
           this.reloadApartment();
         },
         error: (err) => {
           console.error(err);
-          alert(err?.error?.message || JSON.stringify(err?.error) || 'Update failed');
+
+          const message = this.getErrorMessage(err, 'Update failed');
+          this.toastr.error(message, 'Error');
         }
       });
     } else {
       this.residentService.create(dto).subscribe({
         next: () => {
+          this.toastr.success('Resident created successfully', 'Success');
           this.reloadApartment();
         },
         error: (err) => {
           console.error(err);
-          alert(err?.error?.message || JSON.stringify(err?.error) || 'Create failed');
+
+          const message = this.getErrorMessage(err, 'Create failed');
+          this.toastr.error(message, 'Error');
         }
       });
     }
   }
-  
 
   reloadApartment(): void {
     const ap = this.editingApartment;
@@ -598,9 +641,8 @@ export class Apartments implements OnInit {
       },
       error: (err) => {
         console.error(err);
-        alert('Failed to reload apartment');
+        this.toastr.error('Failed to reload apartment', 'Error');
       }
     });
   }
-  
 }

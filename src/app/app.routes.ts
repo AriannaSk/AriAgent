@@ -7,6 +7,7 @@ import { HouseDetail } from './pages/house-detail/house-detail';
 import { HouseBilling } from './pages/billing/house-billing';
 import { InvoiceDetail } from './pages/billing/invoice-detail';
 import { Apartments } from './pages/apartments/apartments';
+import { ApartmentDetail } from './pages/apartment-detail/apartment-detail';
 import { Residents } from './pages/residents/residents';
 import { ResidentDashboardComponent } from './pages/resident-dashboard/resident-dashboard';
 import { ResidentApartmentDetail } from './pages/resident-apartments/resident-apartments';
@@ -23,8 +24,9 @@ export const routes: Routes = [
     children: [
       { path: 'houses', component: AllHouses },
       { path: 'house/:id', component: HouseDetail },
-      { path: 'manager/billing/:id', component: HouseBilling },
       { path: 'apartments', component: Apartments },
+      { path: 'apartment/:id', component: ApartmentDetail },
+      { path: 'manager/billing/:id', component: HouseBilling },
       { path: 'invoices', component: HouseBilling },
       { path: 'residents', component: Residents },
       { path: 'invoice/:id', component: InvoiceDetail }
