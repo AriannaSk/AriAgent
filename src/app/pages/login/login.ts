@@ -34,20 +34,20 @@ export class LoginComponent {
 
     this.auth.login(this.email, this.password).subscribe({
       next: () => {
-        const role = this.auth.getRole();
-        console.log('ROLE AFTER LOGIN:', role);
-        console.log('TOKEN AFTER LOGIN:', this.auth.getToken());
+  const role = this.auth.getRole();
+  console.log('ROLE AFTER LOGIN:', role);
+  console.log('TOKEN AFTER LOGIN:', this.auth.getToken());
 
-        if (role === 'Manager') {
-          this.router.navigate(['/houses']);
-        } else if (role === 'Resident') {
-          this.router.navigate(['/resident/dashboard']);
-        } else {
-          this.router.navigate(['/login']);
-        }
+  if (role === 'Manager') {
+    this.router.navigate(['/houses']);
+  } else if (role === 'Resident') {
+    this.router.navigate(['/resident/dashboard']);
+  } else {
+    this.router.navigate(['/login']);
+  }
 
-        this.loading = false;
-      },
+  this.loading = false;
+},
       error: (err) => {
         console.error(err);
         this.error = 'Invalid email or password';

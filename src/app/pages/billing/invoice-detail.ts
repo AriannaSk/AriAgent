@@ -183,17 +183,21 @@ export class InvoiceDetail implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-
-    if (!id) {
-      this.error.set('Invoice ID not found');
-      this.loading.set(false);
-      return;
-    }
-
-    this.loadInvoice(id);
+  if (this.auth.isResident()) {
+    this.router.navigate(['/resident/invoices']);
+    return;
   }
 
+  const id = this.route.snapshot.paramMap.get('id');
+
+  if (!id) {
+    this.error.set('Invoice ID not found');
+    this.loading.set(false);
+    return;
+  }
+
+  this.loadInvoice(id);
+}
   private isOwnApartment(apartment: ApartmentInfo | null): boolean {
     if (!apartment) return false;
     if (this.auth.isManager()) return true;

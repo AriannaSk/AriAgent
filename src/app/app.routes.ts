@@ -41,6 +41,12 @@ export const routes: Routes = [
     data: { roles: ['Manager'] }
   },
   {
+  path: 'invoices',
+  component: HouseBilling,
+  canActivate: [authGuard],
+  data: { roles: ['Manager'] }
+  },
+  {
     path: 'residents',
     component: Residents,
     canActivate: [authGuard],
@@ -49,8 +55,7 @@ export const routes: Routes = [
   {
     path: 'invoice/:id',
     component: InvoiceDetail,
-    canActivate: [authGuard],
-    data: { roles: ['Manager'] }
+    canActivate: [authGuard]
   },
 
   {
@@ -68,12 +73,6 @@ export const routes: Routes = [
   {
     path: 'resident/invoices',
     component: ResidentInvoicesComponent,
-    canActivate: [authGuard],
-    data: { roles: ['Resident'] }
-  },
-  {
-    path: 'resident/invoice/:id',
-    component: InvoiceDetail,
     canActivate: [authGuard],
     data: { roles: ['Resident'] }
   },

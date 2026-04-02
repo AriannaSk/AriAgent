@@ -12,22 +12,25 @@ export const authGuard: CanActivateFn = (route) => {
   }
 
   const allowedRoles = route.data?.['roles'] as string[] | undefined;
-  const role = auth.getRole();
+  const rawRole = auth.getRole();
+  const role = rawRole?.trim().toLowerCase();
 
   if (!allowedRoles || allowedRoles.length === 0) {
     return true;
   }
 
-  if (role && allowedRoles.includes(role)) {
+  const normalizedAllowedRoles = allowedRoles.map(r => r.trim().toLowerCase());
+
+  if (role && normalizedAllowedRoles.includes(role)) {
     return true;
   }
 
-  if (role === 'Manager') {
+  if (role === 'manager') {
     router.navigate(['/houses']);
     return false;
   }
 
-  if (role === 'Resident') {
+  if (role === 'resident') {
     router.navigate(['/resident/dashboard']);
     return false;
   }

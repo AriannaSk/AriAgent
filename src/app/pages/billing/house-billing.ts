@@ -819,12 +819,6 @@ export class HouseBilling implements OnInit {
 
  openInvoice(invoiceId?: string): void {
   if (!invoiceId) return;
-
-  if (this.auth.isResident()) {
-    this.router.navigate(['/resident/invoice', invoiceId]);
-    return;
-  }
-
   this.router.navigate(['/invoice', invoiceId]);
 }
 
