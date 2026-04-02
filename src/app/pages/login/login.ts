@@ -35,6 +35,8 @@ export class LoginComponent {
     this.auth.login(this.email, this.password).subscribe({
       next: () => {
         const role = this.auth.getRole();
+        console.log('ROLE AFTER LOGIN:', role);
+        console.log('TOKEN AFTER LOGIN:', this.auth.getToken());
 
         if (role === 'Manager') {
           this.router.navigate(['/houses']);

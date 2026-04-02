@@ -165,46 +165,33 @@ export class HouseBilling implements OnInit {
 
   private tryGetApartmentIdFromToken(): string | null {
     const authAny = this.auth as any;
-
     if (typeof authAny.getApartmentId === 'function') {
       return authAny.getApartmentId();
     }
-
     return null;
   }
 
   private tryGetHouseIdFromToken(): string | null {
     const authAny = this.auth as any;
-
     if (typeof authAny.getHouseId === 'function') {
       return authAny.getHouseId();
     }
-
     return null;
   }
 
   private isOwnApartment(apartmentId: string): boolean {
-    if (this.auth.isManager()) {
-      return true;
-    }
+    if (this.auth.isManager()) return true;
 
     const residentId = this.residentApartmentId();
-
-    if (residentId) {
-      return residentId === apartmentId;
-    }
+    if (residentId) return residentId === apartmentId;
 
     const apartment = this.getApartment(apartmentId);
-    if (!apartment) {
-      return false;
-    }
+    if (!apartment) return false;
 
     const currentUserId = this.auth.getUserId();
     const currentEmail = this.auth.getUserEmail()?.toLowerCase();
 
-    if (!Array.isArray(apartment.iedzivotaji)) {
-      return false;
-    }
+    if (!Array.isArray(apartment.iedzivotaji)) return false;
 
     return apartment.iedzivotaji.some((r: any) => {
       const residentUserId =
@@ -241,7 +228,6 @@ export class HouseBilling implements OnInit {
       const filtered = current.filter(
         x => !(x.apartmentId === invoice.apartmentId && x.period === invoice.period)
       );
-
       return [...filtered, invoice].sort((a, b) =>
         (b.period || '').localeCompare(a.period || '')
       );
@@ -250,9 +236,7 @@ export class HouseBilling implements OnInit {
 
   private buildInvoicePayload(apartmentId: string): Invoice | null {
     const apartment = this.getApartment(apartmentId);
-    if (!apartment) {
-      return null;
-    }
+    if (!apartment) return null;
 
     const existing = this.getInvoiceForApartment(apartmentId);
 
@@ -267,9 +251,7 @@ export class HouseBilling implements OnInit {
   }
 
   loadHouses(): void {
-    if (!this.auth.isManager()) {
-      return;
-    }
+    if (!this.auth.isManager()) return;
 
     this.houseService.getAll().subscribe({
       next: (data: House[]) => {
@@ -296,9 +278,7 @@ export class HouseBilling implements OnInit {
   }
 
   onHouseChange(): void {
-    if (!this.auth.isManager()) {
-      return;
-    }
+    if (!this.auth.isManager()) return;
 
     const houseId = this.selectedHouseId();
 
@@ -481,19 +461,12 @@ export class HouseBilling implements OnInit {
   readonly filteredApartments = computed(() => {
     if (this.auth.isResident()) {
       const ownId = this.residentApartmentId() || this.selectedApartmentId();
-
-      if (!ownId) {
-        return this.apartments();
-      }
-
+      if (!ownId) return this.apartments();
       return this.apartments().filter(a => a.id === ownId);
     }
 
     const apartmentId = this.selectedApartmentId();
-
-    if (!apartmentId) {
-      return this.apartments();
-    }
+    if (!apartmentId) return this.apartments();
 
     return this.apartments().filter(a => a.id === apartmentId);
   });
@@ -609,10 +582,7 @@ export class HouseBilling implements OnInit {
     }
 
     this.validateBillingInputForm();
-
-    if (this.billingInputFormInvalid()) {
-      return;
-    }
+    if (this.billingInputFormInvalid()) return;
 
     const dto: BillingInputSaveDto = {
       apartmentId: item.apartmentId,
@@ -822,9 +792,7 @@ export class HouseBilling implements OnInit {
       const existing = this.getInvoiceForApartment(apartment.id);
       const payload = this.buildInvoicePayload(apartment.id);
 
-      if (!payload) {
-        continue;
-      }
+      if (!payload) continue;
 
       const request$ = existing?.id
         ? this.invoiceService.update(existing.id, payload)
@@ -849,10 +817,16 @@ export class HouseBilling implements OnInit {
     this.loadInvoices();
   }
 
-  openInvoice(invoiceId?: string): void {
-    if (!invoiceId) return;
-    this.router.navigate(['/invoice', invoiceId]);
+ openInvoice(invoiceId?: string): void {
+  if (!invoiceId) return;
+
+  if (this.auth.isResident()) {
+    this.router.navigate(['/resident/invoice', invoiceId]);
+    return;
   }
+
+  this.router.navigate(['/invoice', invoiceId]);
+}
 
   addService(): void {
     if (!this.auth.isManager()) {
@@ -942,10 +916,7 @@ export class HouseBilling implements OnInit {
     if (!item) return;
 
     this.validateServiceForm();
-
-    if (this.serviceFormInvalid()) {
-      return;
-    }
+    if (this.serviceFormInvalid()) return;
 
     const payload: Service = {
       ...item,

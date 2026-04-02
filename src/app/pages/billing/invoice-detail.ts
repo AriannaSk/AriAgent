@@ -74,9 +74,7 @@ export class InvoiceDetail implements OnInit {
     const names = apartment.iedzivotaji
       .map((r: any) => {
         const fullName = `${r?.vards ?? ''} ${r?.uzvards ?? ''}`.trim();
-
         if (fullName) return fullName;
-
         return r?.name ?? r?.fullName ?? r?.epasts ?? 'Unknown resident';
       })
       .filter((name: string) => !!name);
@@ -203,9 +201,7 @@ export class InvoiceDetail implements OnInit {
     const currentUserId = this.auth.getUserId();
     const currentEmail = this.auth.getUserEmail()?.toLowerCase();
 
-    if (!Array.isArray(apartment.iedzivotaji)) {
-      return false;
-    }
+    if (!Array.isArray(apartment.iedzivotaji)) return false;
 
     return apartment.iedzivotaji.some((r: any) => {
       const residentUserId =

@@ -402,6 +402,6 @@ export class ResidentInvoicesComponent implements OnInit {
 
   openInvoice(id: string | number | undefined): void {
     if (id == null) return;
-    this.router.navigate(['/invoice', id]);
+    this.router.navigate(['/resident/invoice', id]);
   }
 }
