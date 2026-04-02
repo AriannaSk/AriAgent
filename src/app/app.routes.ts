@@ -17,64 +17,29 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
 
   {
-    path: 'houses',
-    component: AllHouses,
+    path: '',
     canActivate: [authGuard],
-    data: { roles: ['Manager'] }
-  },
-  {
-    path: 'house/:id',
-    component: HouseDetail,
-    canActivate: [authGuard],
-    data: { roles: ['Manager'] }
-  },
-  {
-    path: 'manager/billing/:id',
-    component: HouseBilling,
-    canActivate: [authGuard],
-    data: { roles: ['Manager'] }
-  },
-  {
-    path: 'apartments',
-    component: Apartments,
-    canActivate: [authGuard],
-    data: { roles: ['Manager'] }
-  },
-  {
-  path: 'invoices',
-  component: HouseBilling,
-  canActivate: [authGuard],
-  data: { roles: ['Manager'] }
-  },
-  {
-    path: 'residents',
-    component: Residents,
-    canActivate: [authGuard],
-    data: { roles: ['Manager'] }
-  },
-  {
-    path: 'invoice/:id',
-    component: InvoiceDetail,
-    canActivate: [authGuard]
+    data: { roles: ['Manager'] },
+    children: [
+      { path: 'houses', component: AllHouses },
+      { path: 'house/:id', component: HouseDetail },
+      { path: 'manager/billing/:id', component: HouseBilling },
+      { path: 'apartments', component: Apartments },
+      { path: 'invoices', component: HouseBilling },
+      { path: 'residents', component: Residents },
+      { path: 'invoice/:id', component: InvoiceDetail }
+    ]
   },
 
   {
-    path: 'resident/dashboard',
-    component: ResidentDashboardComponent,
+    path: 'resident',
     canActivate: [authGuard],
-    data: { roles: ['Resident'] }
-  },
-  {
-    path: 'resident/apartment/:id',
-    component: ResidentApartmentDetail,
-    canActivate: [authGuard],
-    data: { roles: ['Resident'] }
-  },
-  {
-    path: 'resident/invoices',
-    component: ResidentInvoicesComponent,
-    canActivate: [authGuard],
-    data: { roles: ['Resident'] }
+    data: { roles: ['Resident'] },
+    children: [
+      { path: 'dashboard', component: ResidentDashboardComponent },
+      { path: 'apartment/:id', component: ResidentApartmentDetail },
+      { path: 'invoices', component: ResidentInvoicesComponent }
+    ]
   },
 
   { path: '**', redirectTo: 'login' }

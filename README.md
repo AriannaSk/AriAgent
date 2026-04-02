@@ -1,59 +1,45 @@
-# BbitUi
+# AriAgent
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.0.
+AriAgent is a full-stack web application for managing apartment buildings.  
+The system allows managers to manage houses, apartments, residents and billing data, while residents can view their apartments and invoices.
 
-## Development server
+---
 
-To start a local development server, run:
+## Technologies
 
-```bash
-ng serve
-```
+- Angular 21
+- ASP.NET Core Web API
+- Entity Framework Core
+- SQLite
+- JWT Authentication
+- Bootstrap 5
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+---
 
-## Code scaffolding
+## Features
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Manager
+- Manage houses
+- Manage apartments
+- Manage residents
+- Work with billing and invoices
 
-```bash
-ng generate component component-name
-```
+### Resident
+- View personal dashboard
+- View apartments
+- View invoices
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Authentication
+- Login with JWT
+- Role-based access (Manager / Resident)
+- Protected routes
 
-```bash
-ng generate --help
-```
+---
 
-## Building
+## How to Run
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
+### Backend
 
 ```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+cd db
+dotnet run

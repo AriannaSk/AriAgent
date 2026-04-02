@@ -12,10 +12,11 @@ type JwtPayload = Record<string, unknown>;
   providedIn: 'root'
 })
 export class AuthService {
-  private api = 'https://localhost:7187/api/auth';
+  private readonly api = 'https://localhost:7187/api/auth';
 
   private readonly roleClaim =
     'http://schemas.microsoft.com/ws/2008/06/identity/claims/role';
+
   private readonly nameClaim =
     'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name';
 
@@ -25,7 +26,7 @@ export class AuthService {
     return this.http
       .post<LoginResponse>(`${this.api}/login`, { email, password })
       .pipe(
-        tap((res) => {
+        tap((res: LoginResponse) => {
           localStorage.setItem('token', res.token);
         })
       );
@@ -48,9 +49,9 @@ export class AuthService {
       const parts = token.split('.');
       if (parts.length < 2) return null;
 
-      let payload = parts[1];
-
-      payload = payload.replace(/-/g, '+').replace(/_/g, '/');
+      let payload = parts[1]
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
 
       while (payload.length % 4 !== 0) {
         payload += '=';
@@ -65,35 +66,42 @@ export class AuthService {
 
   private getPayload(): JwtPayload | null {
     const token = this.getToken();
-    if (!token) return null;
-    return this.decodeJwtPayload(token);
+    return token ? this.decodeJwtPayload(token) : null;
   }
 
-  getRole(): string | null {
-    const payload = this.getPayload();
-    if (!payload) return null;
-
-    const directRole = payload[this.roleClaim];
-    if (typeof directRole === 'string' && directRole.trim()) {
-      return directRole;
+  private toStringValue(value: unknown): string | null {
+    if (typeof value === 'string' && value.trim()) {
+      return value;
     }
 
-    const role = payload['role'];
-    if (typeof role === 'string' && role.trim()) {
-      return role;
-    }
-
-    const roles = payload['roles'];
-    if (typeof roles === 'string' && roles.trim()) {
-      return roles;
-    }
-
-    if (Array.isArray(roles) && roles.length > 0) {
-      const first = roles[0];
-      return typeof first === 'string' ? first : null;
+    if (value != null) {
+      return String(value);
     }
 
     return null;
+  }
+
+  private getClaimValue(...keys: string[]): string | null {
+    const payload = this.getPayload();
+    if (!payload) return null;
+
+    for (const key of keys) {
+      const value = payload[key];
+
+      if (Array.isArray(value) && value.length > 0) {
+        const first = this.toStringValue(value[0]);
+        if (first) return first;
+      }
+
+      const stringValue = this.toStringValue(value);
+      if (stringValue) return stringValue;
+    }
+
+    return null;
+  }
+
+  getRole(): string | null {
+    return this.getClaimValue(this.roleClaim, 'role', 'roles');
   }
 
   hasRole(role: string): boolean {
@@ -109,74 +117,22 @@ export class AuthService {
   }
 
   getUserEmail(): string | null {
-    const payload = this.getPayload();
-    if (!payload) return null;
-
-    const email =
-      payload['email'] ??
-      payload['unique_name'] ??
-      payload[this.nameClaim];
-
-    return typeof email === 'string' ? email : null;
+    return this.getClaimValue('email', 'unique_name', this.nameClaim);
   }
 
   getUserId(): string | null {
-    const payload = this.getPayload();
-    if (!payload) return null;
-
-    const userId =
-      payload['UserId'] ??
-      payload['userId'] ??
-      payload['sub'];
-
-    return typeof userId === 'string' ? userId : userId != null ? String(userId) : null;
+    return this.getClaimValue('UserId', 'userId', 'sub');
   }
 
   getResidentId(): string | null {
-    const payload = this.getPayload();
-    if (!payload) return null;
-
-    const residentId =
-      payload['IedzivotajsId'] ??
-      payload['iedzivotajsId'] ??
-      payload['residentId'];
-
-    return typeof residentId === 'string'
-      ? residentId
-      : residentId != null
-        ? String(residentId)
-        : null;
+    return this.getClaimValue('IedzivotajsId', 'iedzivotajsId', 'residentId');
   }
 
   getApartmentId(): string | null {
-    const payload = this.getPayload();
-    if (!payload) return null;
-
-    const apartmentId =
-      payload['DzivoklisId'] ??
-      payload['dzivoklisId'] ??
-      payload['apartmentId'];
-
-    return typeof apartmentId === 'string'
-      ? apartmentId
-      : apartmentId != null
-        ? String(apartmentId)
-        : null;
+    return this.getClaimValue('DzivoklisId', 'dzivoklisId', 'apartmentId');
   }
 
   getHouseId(): string | null {
-    const payload = this.getPayload();
-    if (!payload) return null;
-
-    const houseId =
-      payload['MajaId'] ??
-      payload['majaId'] ??
-      payload['houseId'];
-
-    return typeof houseId === 'string'
-      ? houseId
-      : houseId != null
-        ? String(houseId)
-        : null;
+    return this.getClaimValue('MajaId', 'majaId', 'houseId');
   }
 }

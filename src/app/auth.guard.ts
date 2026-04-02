@@ -1,14 +1,13 @@
 import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
+import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { AuthService } from './services/auth.service';
 
-export const authGuard: CanActivateFn = (route) => {
+export const authGuard: CanActivateFn = (route): boolean | UrlTree => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
   if (!auth.isLoggedIn()) {
-    router.navigate(['/login']);
-    return false;
+    return router.createUrlTree(['/login']);
   }
 
   const allowedRoles = route.data?.['roles'] as string[] | undefined;
@@ -26,15 +25,12 @@ export const authGuard: CanActivateFn = (route) => {
   }
 
   if (role === 'manager') {
-    router.navigate(['/houses']);
-    return false;
+    return router.createUrlTree(['/houses']);
   }
 
   if (role === 'resident') {
-    router.navigate(['/resident/dashboard']);
-    return false;
+    return router.createUrlTree(['/resident/dashboard']);
   }
 
-  router.navigate(['/login']);
-  return false;
+  return router.createUrlTree(['/login']);
 };
