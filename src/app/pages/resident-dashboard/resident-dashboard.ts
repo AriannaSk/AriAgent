@@ -40,40 +40,40 @@ export class ResidentDashboardComponent implements OnInit {
   });
 
   readonly residentFullName = computed<string>(() => {
-  const r = this.resident();
-  if (!r) return 'Resident';
+    const r = this.resident();
+    if (!r) return 'Resident';
 
-  const raw = r as unknown as Record<string, unknown>;
-  const first = this.asText(raw['vards']);
-  const last = this.asText(raw['uzvards']);
+    const raw = r as unknown as Record<string, unknown>;
+    const first = this.asText(raw['vards']);
+    const last = this.asText(raw['uzvards']);
 
-  const full = `${first} ${last}`.trim();
-  return full || 'Resident';
-});
-readonly residentPersonalCode = computed<string>(() => {
-  const r = this.resident();
-  if (!r) return 'Not provided';
+    const full = `${first} ${last}`.trim();
+    return full || 'Resident';
+  });
 
-  const raw = r as unknown as Record<string, unknown>;
-  return this.asText(raw['personasKods']) || 'Not provided';
-});
+  readonly residentPersonalCode = computed<string>(() => {
+    const r = this.resident();
+    if (!r) return 'Not provided';
+
+    const raw = r as unknown as Record<string, unknown>;
+    return this.asText(raw['personasKods']) || 'Not provided';
+  });
 
   readonly residentEmail = computed<string>(() => {
-  const r = this.resident();
-  if (!r) return 'Not provided';
+    const r = this.resident();
+    if (!r) return 'Not provided';
 
-  const raw = r as unknown as Record<string, unknown>;
-  return this.asText(raw['epasts']) || 'Not provided';
-});
+    const raw = r as unknown as Record<string, unknown>;
+    return this.asText(raw['epasts']) || 'Not provided';
+  });
 
+  readonly residentPhone = computed<string>(() => {
+    const r = this.resident();
+    if (!r) return 'Not provided';
 
-readonly residentPhone = computed<string>(() => {
-  const r = this.resident();
-  if (!r) return 'Not provided';
-
-  const raw = r as unknown as Record<string, unknown>;
-  return this.asText(raw['telefons']) || 'Not provided';
-});
+    const raw = r as unknown as Record<string, unknown>;
+    return this.asText(raw['telefons']) || 'Not provided';
+  });
 
   readonly userInitials = computed<string>(() => {
     const r = this.resident();
@@ -96,25 +96,25 @@ readonly residentPhone = computed<string>(() => {
   });
 
   readonly houseAddress = computed<string>(() => {
-  const ap = this.apartment();
-  if (!ap) return '';
+    const ap = this.apartment();
+    if (!ap) return '';
 
-  const raw = ap as unknown as Record<string, unknown>;
+    const raw = ap as unknown as Record<string, any>;
 
-  const residents = raw['iedzivotaji'] as any[];
-
-  if (residents?.length) {
-    const dzivokli = residents[0]?.dzivokli;
-
-    if (dzivokli?.length) {
-      const address = dzivokli[0]?.majaNosaukums;
-
-      if (address) return address;
+    if (raw['majaNosaukums']) {
+      return String(raw['majaNosaukums']);
     }
-  }
 
-  return 'Address unavailable';
-});
+    if (raw['maja']?.nosaukums) {
+      return String(raw['maja'].nosaukums);
+    }
+
+    if (raw['maja']?.adrese) {
+      return String(raw['maja'].adrese);
+    }
+
+    return 'Address unavailable';
+  });
 
   constructor(
     private residentService: ResidentService,
@@ -135,14 +135,12 @@ readonly residentPhone = computed<string>(() => {
     this.residentService.getMe().subscribe({
       next: (residentData) => {
         this.resident.set(residentData);
-        console.log('RESIDENT DATA:', residentData);
 
         this.apartmentService.getMyApartments().subscribe({
           next: (apartmentData) => {
             const apartments = apartmentData ?? [];
             this.apartments.set(apartments);
-            console.log('APARTMENTS DATA:', apartments);
-            
+
             if (apartments.length === 0) {
               this.latestInvoices.set([]);
               this.loading.set(false);
@@ -150,7 +148,7 @@ readonly residentPhone = computed<string>(() => {
             }
 
             const firstApartment = apartments[0];
-            console.log('FIRST APARTMENT JSON:', JSON.stringify(firstApartment, null, 2));
+
             this.invoiceService.getMyInvoicesByApartment(firstApartment.id).subscribe({
               next: (invoiceData) => {
                 const sorted = [...(invoiceData ?? [])].sort((a, b) =>
@@ -161,37 +159,40 @@ readonly residentPhone = computed<string>(() => {
                 this.loading.set(false);
               },
               error: (err) => {
-                console.error(err);
+                console.error('Invoices error:', err);
                 this.latestInvoices.set([]);
                 this.loading.set(false);
               }
             });
           },
           error: (err) => {
-            console.error(err);
+            console.error('Apartments error:', err);
             this.error.set('Failed to load apartments');
             this.loading.set(false);
           }
         });
       },
       error: (err) => {
-        console.error(err);
+        console.error('Resident error:', err);
         this.error.set('Failed to load resident profile');
         this.loading.set(false);
       }
     });
   }
 
-  openApartment(id: string): void {
-    this.router.navigate(['/resident/apartment', id]);
+  openProfile(): void {
+    console.log('Open profile clicked');
+    this.router.navigate(['/resident/profile']);
+  }
+
+  openApartment(): void {
+    console.log('Open apartment clicked');
+    this.router.navigate(['/resident/profile']);
   }
 
   openInvoices(): void {
+    console.log('Open invoices clicked');
     this.router.navigate(['/resident/invoices']);
-  }
-
-  openProfile(): void {
-    this.router.navigate(['/resident/profile']);
   }
 
   logout(): void {

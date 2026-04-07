@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using db.DTOs;
 using db.Models;
 using db.Services.Interfaces;
@@ -138,4 +138,36 @@ public class DzivoklisController : ControllerBase
 
         return Ok(_mapper.Map<DzivoklisReadDto>(item));
     }
+  // UPDATE current resident apartment
+  [Authorize(Roles = "Resident")]
+  [HttpPut("my/{id}")]
+  public async Task<IActionResult> PutMyDzivoklis(Guid id, [FromBody] DzivoklisUpdateDto dto)
+  {
+    if (id != dto.Id)
+      return BadRequest("Id mismatch");
+
+    var userIdClaim = User.FindFirst("UserId")?.Value;
+
+    if (string.IsNullOrWhiteSpace(userIdClaim))
+      return Unauthorized("UserId claim not found.");
+
+    if (!Guid.TryParse(userIdClaim, out var userId))
+      return Unauthorized("Invalid UserId claim.");
+
+    var myApartment = await _service.GetMyByIdAsync(userId, id);
+
+    if (myApartment == null)
+      return Forbid();
+
+    var entity = _mapper.Map<Dzivoklis>(dto);
+
+    var residentIds = myApartment.Iedzivotaji.Select(x => x.Id).ToList();
+
+    var ok = await _service.UpdateAsync(id, entity, residentIds);
+
+    if (!ok)
+      return NotFound();
+
+    return NoContent();
+  }
 }

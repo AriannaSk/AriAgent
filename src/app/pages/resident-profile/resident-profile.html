@@ -2,10 +2,12 @@
   <div class="page-header">
     <div>
       <h2 class="page-title">My Profile</h2>
-      <p class="page-subtitle">Manage your personal information</p>
+      <p class="page-subtitle">
+        Manage your personal information and apartment details
+      </p>
     </div>
 
-    <button class="back-btn" (click)="goBack()">
+    <button class="back-btn" type="button" (click)="goBack()">
       <i class="bi bi-arrow-left-short"></i>
       Back
     </button>
@@ -23,117 +25,268 @@
     {{ success() }}
   </div>
 
-  <div class="profile-card" *ngIf="!loading() && resident">
-    <div class="profile-card-header">
-      <div class="profile-icon">
-        <i class="bi bi-person-circle"></i>
+  <ng-container *ngIf="!loading() && resident">
+    <div class="profile-card">
+      <div class="profile-card-header">
+        <div class="profile-icon">
+          <i class="bi bi-person-circle"></i>
+        </div>
+
+        <div>
+          <h3 class="profile-card-title">
+            {{ resident.vards }} {{ resident.uzvards }}
+          </h3>
+          <p class="profile-card-subtitle">
+            Update your profile details below
+          </p>
+        </div>
       </div>
 
-      <div>
-        <h3 class="profile-card-title">
-          {{ resident.vards }} {{ resident.uzvards }}
-        </h3>
-        <p class="profile-card-subtitle">
-          Update your profile details below
-        </p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input
+            class="form-input"
+            [class.invalid]="showValidation() && !!validationErrors().vards"
+            [(ngModel)]="resident.vards"
+            (ngModelChange)="clearMessages(); validateResidentForm()"
+            placeholder="Enter your name"
+          />
+          <div class="field-error" *ngIf="showValidation() && validationErrors().vards">
+            {{ validationErrors().vards }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Surname</label>
+          <input
+            class="form-input"
+            [class.invalid]="showValidation() && !!validationErrors().uzvards"
+            [(ngModel)]="resident.uzvards"
+            (ngModelChange)="clearMessages(); validateResidentForm()"
+            placeholder="Enter your surname"
+          />
+          <div class="field-error" *ngIf="showValidation() && validationErrors().uzvards">
+            {{ validationErrors().uzvards }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input
+            class="form-input"
+            type="email"
+            [class.invalid]="showValidation() && !!validationErrors().epasts"
+            [(ngModel)]="resident.epasts"
+            (ngModelChange)="clearMessages(); validateResidentForm()"
+            placeholder="Enter your email"
+          />
+          <div class="field-error" *ngIf="showValidation() && validationErrors().epasts">
+            {{ validationErrors().epasts }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input
+            class="form-input"
+            [class.invalid]="showValidation() && !!validationErrors().telefons"
+            [(ngModel)]="resident.telefons"
+            (ngModelChange)="clearMessages(); validateResidentForm()"
+            placeholder="+37122222222"
+          />
+          <div class="field-error" *ngIf="showValidation() && validationErrors().telefons">
+            {{ validationErrors().telefons }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Personal Code</label>
+          <input
+            class="form-input"
+            [class.invalid]="showValidation() && !!validationErrors().personasKods"
+            [(ngModel)]="resident.personasKods"
+            (ngModelChange)="clearMessages(); validateResidentForm()"
+            placeholder="030303-11112"
+          />
+          <div class="field-error" *ngIf="showValidation() && validationErrors().personasKods">
+            {{ validationErrors().personasKods }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Owner</label>
+          <input
+            class="form-input readonly-input"
+            [value]="resident.isOwner ? 'Yes' : 'No'"
+            readonly
+          />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button
+          class="save-btn"
+          type="button"
+          (click)="saveResident()"
+          [disabled]="savingResident()"
+        >
+          <i class="bi bi-check2-circle"></i>
+          {{ savingResident() ? 'Saving...' : 'Save profile' }}
+        </button>
+
+        <button class="cancel-btn" type="button" (click)="goBack()">
+          Cancel
+        </button>
       </div>
     </div>
 
-    <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Name</label>
-        <input
-          class="form-input"
-          [class.invalid]="showValidation() && !!validationErrors().vards"
-          [(ngModel)]="resident.vards"
-          (ngModelChange)="clearMessages(); validateForm()"
-          placeholder="Enter your name"
-        />
-        <div class="field-error" *ngIf="showValidation() && validationErrors().vards">
-          {{ validationErrors().vards }}
+    <div class="profile-card apartment-card">
+      <div class="profile-card-header">
+        <div class="profile-icon">
+          <i class="bi bi-building"></i>
+        </div>
+
+        <div>
+          <h3 class="profile-card-title">My Apartment</h3>
+          <p class="profile-card-subtitle">
+            Update your apartment information below
+          </p>
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Surname</label>
-        <input
-          class="form-input"
-          [class.invalid]="showValidation() && !!validationErrors().uzvards"
-          [(ngModel)]="resident.uzvards"
-          (ngModelChange)="clearMessages(); validateForm()"
-          placeholder="Enter your surname"
-        />
-        <div class="field-error" *ngIf="showValidation() && validationErrors().uzvards">
-          {{ validationErrors().uzvards }}
+      <div *ngIf="apartmentForm; else noApartmentBlock" class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Apartment Number</label>
+          <input
+            type="number"
+            min="1"
+            max="1000"
+            class="form-input"
+            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().numurs"
+            [(ngModel)]="apartmentForm.numurs"
+            (ngModelChange)="clearMessages(); validateApartmentForm()"
+            placeholder="Enter apartment number"
+          />
+          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().numurs">
+            {{ apartmentValidationErrors().numurs }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Floor</label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            class="form-input"
+            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().stavs"
+            [(ngModel)]="apartmentForm.stavs"
+            (ngModelChange)="clearMessages(); validateApartmentForm()"
+            placeholder="Enter floor"
+          />
+          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().stavs">
+            {{ apartmentValidationErrors().stavs }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Rooms</label>
+          <input
+            type="number"
+            min="1"
+            max="10"
+            class="form-input"
+            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().istabuSkaits"
+            [(ngModel)]="apartmentForm.istabuSkaits"
+            (ngModelChange)="clearMessages(); validateApartmentForm()"
+            placeholder="Enter rooms count"
+          />
+          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().istabuSkaits">
+            {{ apartmentValidationErrors().istabuSkaits }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Residents Count</label>
+          <input
+            type="number"
+            min="0"
+            max="20"
+            class="form-input"
+            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().iedzivotajuSkaits"
+            [(ngModel)]="apartmentForm.iedzivotajuSkaits"
+            (ngModelChange)="clearMessages(); validateApartmentForm()"
+            placeholder="Enter residents count"
+          />
+          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().iedzivotajuSkaits">
+            {{ apartmentValidationErrors().iedzivotajuSkaits }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Total Area</label>
+          <input
+            type="number"
+            min="1"
+            max="1000"
+            step="0.01"
+            class="form-input"
+            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().pilnaPlatiba"
+            [(ngModel)]="apartmentForm.pilnaPlatiba"
+            (ngModelChange)="clearMessages(); validateApartmentForm()"
+            placeholder="Enter total area"
+          />
+          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().pilnaPlatiba">
+            {{ apartmentValidationErrors().pilnaPlatiba }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Living Area</label>
+          <input
+            type="number"
+            min="1"
+            max="1000"
+            step="0.01"
+            class="form-input"
+            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().dzivojamaPlatiba"
+            [(ngModel)]="apartmentForm.dzivojamaPlatiba"
+            (ngModelChange)="clearMessages(); validateApartmentForm()"
+            placeholder="Enter living area"
+          />
+          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().dzivojamaPlatiba">
+            {{ apartmentValidationErrors().dzivojamaPlatiba }}
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label class="form-label">Address</label>
+          <input
+            class="form-input readonly-input"
+            [value]="houseAddress()"
+            readonly
+          />
         </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Email</label>
-        <input
-          class="form-input"
-          type="email"
-          [class.invalid]="showValidation() && !!validationErrors().epasts"
-          [(ngModel)]="resident.epasts"
-          (ngModelChange)="clearMessages(); validateForm()"
-          placeholder="Enter your email"
-        />
-        <div class="field-error" *ngIf="showValidation() && validationErrors().epasts">
-          {{ validationErrors().epasts }}
-        </div>
+      <div class="form-actions" *ngIf="apartmentForm">
+        <button
+          class="save-btn"
+          type="button"
+          (click)="saveApartment()"
+          [disabled]="savingApartment()"
+        >
+          <i class="bi bi-house-check"></i>
+          {{ savingApartment() ? 'Saving...' : 'Save apartment' }}
+        </button>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Phone</label>
-        <input
-          class="form-input"
-          [class.invalid]="showValidation() && !!validationErrors().telefons"
-          [(ngModel)]="resident.telefons"
-          (ngModelChange)="clearMessages(); validateForm()"
-          placeholder="+37122222222"
-        />
-        <div class="field-error" *ngIf="showValidation() && validationErrors().telefons">
-          {{ validationErrors().telefons }}
+      <ng-template #noApartmentBlock>
+        <div class="message-card">
+          No apartment linked to your account.
         </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Personal Code</label>
-        <input
-          class="form-input"
-          [class.invalid]="showValidation() && !!validationErrors().personasKods"
-          [(ngModel)]="resident.personasKods"
-          (ngModelChange)="clearMessages(); validateForm()"
-          placeholder="030303-11112"
-        />
-        <div class="field-error" *ngIf="showValidation() && validationErrors().personasKods">
-          {{ validationErrors().personasKods }}
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Owner</label>
-        <input
-          class="form-input readonly-input"
-          [value]="resident.isOwner ? 'Yes' : 'No'"
-          readonly
-        />
-      </div>
+      </ng-template>
     </div>
-
-    <div class="form-actions">
-      <button
-        class="save-btn"
-        (click)="save()"
-        [disabled]="saving()"
-      >
-        <i class="bi bi-check2-circle"></i>
-        {{ saving() ? 'Saving...' : 'Save changes' }}
-      </button>
-
-      <button class="cancel-btn" (click)="goBack()">
-        Cancel
-      </button>
-    </div>
-  </div>
+  </ng-container>
 </div>

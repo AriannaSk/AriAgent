@@ -78,10 +78,10 @@
         </div>
 
         <div class="card-actions">
-          <button class="btn-secondary" (click)="openProfile()">
-            Edit profile
-          </button>
-        </div>
+        <button type="button" class="btn-secondary" (click)="openProfile()">
+          Edit profile
+        </button>
+      </div>
       </article>
 
       <article class="dashboard-card">
@@ -129,14 +129,15 @@
         </ng-template>
 
         <div class="card-actions">
-          <button
-            class="btn-secondary"
-            (click)="apartment()?.id && openApartment(apartment()!.id)"
-            [disabled]="!apartment()?.id"
-          >
-            View apartment
-          </button>
-        </div>
+        <button
+          type="button"
+          class="btn-secondary"
+          (click)="openApartment()"
+          [disabled]="!apartment()"
+        >
+          View apartment
+        </button>
+      </div>
       </article>
 
       <article class="dashboard-card">

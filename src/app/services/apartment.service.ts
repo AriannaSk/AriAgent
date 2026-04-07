@@ -40,4 +40,8 @@ export class ApartmentService {
   getMyApartmentById(id: string): Observable<Apartment> {
     return this.http.get<Apartment>(`${this.apiUrl}/my/${id}`);
   }
+
+  updateMyApartment(id: string, apartment: any) {
+    return this.http.put(`${this.apiUrl}/my/${id}`, apartment);
+  }
 }

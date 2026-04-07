@@ -221,6 +221,9 @@
   background: #f8fafc;
   border-color: #cbd5e1;
 }
+.apartment-card {
+  margin-top: 32px;
+}
 
 @media (max-width: 768px) {
   .resident-page {

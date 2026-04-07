@@ -12,6 +12,7 @@ import { Residents } from './pages/residents/residents';
 import { ResidentDashboardComponent } from './pages/resident-dashboard/resident-dashboard';
 import { ResidentApartmentDetail } from './pages/resident-apartments/resident-apartments';
 import { ResidentInvoicesComponent } from './pages/resident-invoices/resident-invoices';
+import { ResidentProfileComponent } from './pages/resident-profile/resident-profile';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -33,16 +34,17 @@ export const routes: Routes = [
     ]
   },
 
-  {
-    path: 'resident',
-    canActivate: [authGuard],
-    data: { roles: ['Resident'] },
-    children: [
-      { path: 'dashboard', component: ResidentDashboardComponent },
-      { path: 'apartment/:id', component: ResidentApartmentDetail },
-      { path: 'invoices', component: ResidentInvoicesComponent }
-    ]
-  },
+ {
+  path: 'resident',
+  canActivate: [authGuard],
+  data: { roles: ['Resident'] },
+  children: [
+    { path: 'dashboard', component: ResidentDashboardComponent },
+    { path: 'profile', component: ResidentProfileComponent },
+    { path: 'apartment/:id', component: ResidentApartmentDetail },
+    { path: 'invoices', component: ResidentInvoicesComponent }
+  ]
+},
 
   { path: '**', redirectTo: 'login' }
 ];

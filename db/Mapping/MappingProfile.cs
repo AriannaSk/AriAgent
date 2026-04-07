@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using db.DTOs;
 using db.Models;
 
@@ -15,22 +15,26 @@ public class MappingProfile : Profile
         CreateMap<MajaCreateDto, Maja>();
         CreateMap<MajaUpdateDto, Maja>();
 
-        // =========================
-        // DZIVOKLIS
-        // =========================
+    // =========================
+    // DZIVOKLIS
+    // =========================
 
-        // 🔥 FULL DTO (если используешь где-то подробно)
-        CreateMap<Dzivoklis, DzivoklisReadDto>();
+    // 🔥 FULL DTO (если используешь где-то подробно)
+    CreateMap<Dzivoklis, DzivoklisReadDto>()
+ .ForMember(dest => dest.MajaNosaukums, opt => opt.MapFrom(src =>
+     src.Maja != null
+         ? $"{src.Maja.Iela} {src.Maja.Numurs}, {src.Maja.Pilseta}"
+         : ""
+ ));
 
-        // 🔥 ВОТ ГЛАВНЫЙ ФИКС
-        CreateMap<Dzivoklis, DzivoklisShortDto>()
-            .ForMember(dest => dest.MajaNosaukums, opt => opt.MapFrom(src =>
-                src.Maja != null
-                    ? src.Maja.Iela + " " + src.Maja.Numurs + ", " + src.Maja.Pilseta
-                    : ""
-            ));
+    CreateMap<Dzivoklis, DzivoklisShortDto>()
+        .ForMember(dest => dest.MajaNosaukums, opt => opt.MapFrom(src =>
+            src.Maja != null
+                ? $"{src.Maja.Iela} {src.Maja.Numurs}, {src.Maja.Pilseta}"
+                : ""
+        ));
 
-        CreateMap<DzivoklisCreateDto, Dzivoklis>()
+    CreateMap<DzivoklisCreateDto, Dzivoklis>()
             .ForMember(d => d.Iedzivotaji, opt => opt.Ignore());
 
         CreateMap<DzivoklisUpdateDto, Dzivoklis>()
