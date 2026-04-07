@@ -141,152 +141,159 @@
       </div>
     </div>
 
-    <div class="profile-card apartment-card">
-      <div class="profile-card-header">
-        <div class="profile-icon">
-          <i class="bi bi-building"></i>
+    <ng-container *ngIf="apartmentForms.length > 0; else noApartmentBlock">
+      <div
+        class="profile-card apartment-card"
+        *ngFor="let apartment of apartmentForms; let i = index"
+      >
+        <div class="profile-card-header">
+          <div class="profile-icon">
+            <i class="bi bi-building"></i>
+          </div>
+
+          <div>
+            <h3 class="profile-card-title">
+              My Apartment {{ apartment.numurs ? ('#' + apartment.numurs) : ('#' + (i + 1)) }}
+            </h3>
+            <p class="profile-card-subtitle">
+              Update your apartment information below
+            </p>
+          </div>
         </div>
 
-        <div>
-          <h3 class="profile-card-title">My Apartment</h3>
-          <p class="profile-card-subtitle">
-            Update your apartment information below
-          </p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Apartment Number</label>
+            <input
+              type="number"
+              min="1"
+              max="1000"
+              class="form-input"
+              [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().numurs"
+              [(ngModel)]="apartment.numurs"
+              (ngModelChange)="clearMessages(); validateApartmentForm(apartment)"
+              placeholder="Enter apartment number"
+            />
+            <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().numurs">
+              {{ apartmentValidationErrors().numurs }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Floor</label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              class="form-input"
+              [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().stavs"
+              [(ngModel)]="apartment.stavs"
+              (ngModelChange)="clearMessages(); validateApartmentForm(apartment)"
+              placeholder="Enter floor"
+            />
+            <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().stavs">
+              {{ apartmentValidationErrors().stavs }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Rooms</label>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              class="form-input"
+              [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().istabuSkaits"
+              [(ngModel)]="apartment.istabuSkaits"
+              (ngModelChange)="clearMessages(); validateApartmentForm(apartment)"
+              placeholder="Enter rooms count"
+            />
+            <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().istabuSkaits">
+              {{ apartmentValidationErrors().istabuSkaits }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Residents Count</label>
+            <input
+              type="number"
+              min="0"
+              max="20"
+              class="form-input"
+              [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().iedzivotajuSkaits"
+              [(ngModel)]="apartment.iedzivotajuSkaits"
+              (ngModelChange)="clearMessages(); validateApartmentForm(apartment)"
+              placeholder="Enter residents count"
+            />
+            <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().iedzivotajuSkaits">
+              {{ apartmentValidationErrors().iedzivotajuSkaits }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Total Area</label>
+            <input
+              type="number"
+              min="1"
+              max="1000"
+              step="0.01"
+              class="form-input"
+              [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().pilnaPlatiba"
+              [(ngModel)]="apartment.pilnaPlatiba"
+              (ngModelChange)="clearMessages(); validateApartmentForm(apartment)"
+              placeholder="Enter total area"
+            />
+            <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().pilnaPlatiba">
+              {{ apartmentValidationErrors().pilnaPlatiba }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Living Area</label>
+            <input
+              type="number"
+              min="1"
+              max="1000"
+              step="0.01"
+              class="form-input"
+              [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().dzivojamaPlatiba"
+              [(ngModel)]="apartment.dzivojamaPlatiba"
+              (ngModelChange)="clearMessages(); validateApartmentForm(apartment)"
+              placeholder="Enter living area"
+            />
+            <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().dzivojamaPlatiba">
+              {{ apartmentValidationErrors().dzivojamaPlatiba }}
+            </div>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Address</label>
+            <input
+              class="form-input readonly-input"
+              [value]="houseAddress(apartment)"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button
+            class="save-btn"
+            type="button"
+            (click)="saveApartment(apartment)"
+            [disabled]="savingApartment()"
+          >
+            <i class="bi bi-house-check"></i>
+            {{ savingApartment() ? 'Saving...' : 'Save apartment' }}
+          </button>
         </div>
       </div>
+    </ng-container>
 
-      <div *ngIf="apartmentForm; else noApartmentBlock" class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Apartment Number</label>
-          <input
-            type="number"
-            min="1"
-            max="1000"
-            class="form-input"
-            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().numurs"
-            [(ngModel)]="apartmentForm.numurs"
-            (ngModelChange)="clearMessages(); validateApartmentForm()"
-            placeholder="Enter apartment number"
-          />
-          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().numurs">
-            {{ apartmentValidationErrors().numurs }}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Floor</label>
-          <input
-            type="number"
-            min="0"
-            max="100"
-            class="form-input"
-            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().stavs"
-            [(ngModel)]="apartmentForm.stavs"
-            (ngModelChange)="clearMessages(); validateApartmentForm()"
-            placeholder="Enter floor"
-          />
-          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().stavs">
-            {{ apartmentValidationErrors().stavs }}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Rooms</label>
-          <input
-            type="number"
-            min="1"
-            max="10"
-            class="form-input"
-            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().istabuSkaits"
-            [(ngModel)]="apartmentForm.istabuSkaits"
-            (ngModelChange)="clearMessages(); validateApartmentForm()"
-            placeholder="Enter rooms count"
-          />
-          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().istabuSkaits">
-            {{ apartmentValidationErrors().istabuSkaits }}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Residents Count</label>
-          <input
-            type="number"
-            min="0"
-            max="20"
-            class="form-input"
-            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().iedzivotajuSkaits"
-            [(ngModel)]="apartmentForm.iedzivotajuSkaits"
-            (ngModelChange)="clearMessages(); validateApartmentForm()"
-            placeholder="Enter residents count"
-          />
-          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().iedzivotajuSkaits">
-            {{ apartmentValidationErrors().iedzivotajuSkaits }}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Total Area</label>
-          <input
-            type="number"
-            min="1"
-            max="1000"
-            step="0.01"
-            class="form-input"
-            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().pilnaPlatiba"
-            [(ngModel)]="apartmentForm.pilnaPlatiba"
-            (ngModelChange)="clearMessages(); validateApartmentForm()"
-            placeholder="Enter total area"
-          />
-          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().pilnaPlatiba">
-            {{ apartmentValidationErrors().pilnaPlatiba }}
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Living Area</label>
-          <input
-            type="number"
-            min="1"
-            max="1000"
-            step="0.01"
-            class="form-input"
-            [class.invalid]="showApartmentValidation() && !!apartmentValidationErrors().dzivojamaPlatiba"
-            [(ngModel)]="apartmentForm.dzivojamaPlatiba"
-            (ngModelChange)="clearMessages(); validateApartmentForm()"
-            placeholder="Enter living area"
-          />
-          <div class="field-error" *ngIf="showApartmentValidation() && apartmentValidationErrors().dzivojamaPlatiba">
-            {{ apartmentValidationErrors().dzivojamaPlatiba }}
-          </div>
-        </div>
-
-        <div class="form-group full-width">
-          <label class="form-label">Address</label>
-          <input
-            class="form-input readonly-input"
-            [value]="houseAddress()"
-            readonly
-          />
-        </div>
+    <ng-template #noApartmentBlock>
+      <div class="message-card">
+        No apartment linked to your account.
       </div>
-
-      <div class="form-actions" *ngIf="apartmentForm">
-        <button
-          class="save-btn"
-          type="button"
-          (click)="saveApartment()"
-          [disabled]="savingApartment()"
-        >
-          <i class="bi bi-house-check"></i>
-          {{ savingApartment() ? 'Saving...' : 'Save apartment' }}
-        </button>
-      </div>
-
-      <ng-template #noApartmentBlock>
-        <div class="message-card">
-          No apartment linked to your account.
-        </div>
-      </ng-template>
-    </div>
+    </ng-template>
   </ng-container>
 </div>

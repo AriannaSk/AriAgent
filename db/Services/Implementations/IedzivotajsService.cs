@@ -1,4 +1,4 @@
-﻿using db.Data;
+using db.Data;
 using db.DTOs;
 using db.Models;
 using db.Services.Interfaces;
@@ -163,7 +163,43 @@ public class IedzivotajsService : IIedzivotajsService
 
         return resident;
     }
-    public async Task<Iedzivotajs?> GetByUserIdAsync(Guid userId)
+  public async Task<bool> CreateAccountForExistingResidentAsync(ResidentExistingAccountCreateDto dto)
+  {
+    var resident = await _db.Iedzivotaji
+        .Include(r => r.User)
+        .FirstOrDefaultAsync(r => r.Id == dto.ResidentId);
+
+    if (resident == null)
+      throw new Exception("Resident not found.");
+
+    if (resident.User != null)
+      throw new Exception("This resident already has an account.");
+
+    var loginEmail = dto.LoginEmail.Trim().ToLower();
+
+    var existingUser = await _db.Users
+        .FirstOrDefaultAsync(u => u.Email.ToLower() == loginEmail);
+
+    if (existingUser != null)
+      throw new Exception("User with this login email already exists.");
+
+    var user = new User
+    {
+      Email = loginEmail,
+      Password = dto.Password,
+      Role = "Resident",
+      IedzivotajsId = resident.Id
+    };
+
+    _db.Users.Add(user);
+    await _db.SaveChangesAsync();
+
+    resident.User = user;
+    await _db.SaveChangesAsync();
+
+    return true;
+  }
+  public async Task<Iedzivotajs?> GetByUserIdAsync(Guid userId)
     {
         var user = await _db.Users
             .AsNoTracking()

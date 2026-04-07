@@ -23,7 +23,7 @@ export class ResidentDashboardComponent implements OnInit {
   readonly apartments = signal<Apartment[]>([]);
   readonly latestInvoices = signal<Invoice[]>([]);
 
-  readonly apartment = computed<Apartment | null>(() => {
+  readonly firstApartment = computed<Apartment | null>(() => {
     const list = this.apartments();
     return list.length > 0 ? list[0] : null;
   });
@@ -95,25 +95,10 @@ export class ResidentDashboardComponent implements OnInit {
     return `${first}${last}`.toUpperCase();
   });
 
-  readonly houseAddress = computed<string>(() => {
-    const ap = this.apartment();
-    if (!ap) return '';
-
-    const raw = ap as unknown as Record<string, any>;
-
-    if (raw['majaNosaukums']) {
-      return String(raw['majaNosaukums']);
-    }
-
-    if (raw['maja']?.nosaukums) {
-      return String(raw['maja'].nosaukums);
-    }
-
-    if (raw['maja']?.adrese) {
-      return String(raw['maja'].adrese);
-    }
-
-    return 'Address unavailable';
+  readonly apartmentNumbersText = computed<string>(() => {
+    return this.apartments()
+      .map(a => `#${a.numurs}`)
+      .join(', ');
   });
 
   constructor(
@@ -147,6 +132,7 @@ export class ResidentDashboardComponent implements OnInit {
               return;
             }
 
+            // invoices пока оставляем по первой квартире, чтобы не ломать текущую логику
             const firstApartment = apartments[0];
 
             this.invoiceService.getMyInvoicesByApartment(firstApartment.id).subscribe({
@@ -180,18 +166,42 @@ export class ResidentDashboardComponent implements OnInit {
     });
   }
 
+  houseAddress(apartment: Apartment): string {
+    const ap = apartment as any;
+    if (!ap) return 'Address unavailable';
+
+    const directAddress =
+      ap?.majaNosaukums ||
+      ap?.maja?.adrese ||
+      ap?.adrese ||
+      ap?.houseAddress ||
+      ap?.address;
+
+    if (directAddress && String(directAddress).trim()) {
+      return String(directAddress).trim();
+    }
+
+    const iela = ap?.maja?.iela || ap?.maja?.street || '';
+    const majasNumurs =
+      ap?.maja?.majasNumurs ||
+      ap?.maja?.numurs ||
+      ap?.maja?.houseNumber ||
+      '';
+    const pilseta = ap?.maja?.pilseta || ap?.maja?.city || '';
+
+    const full = [iela, majasNumurs, pilseta].filter(Boolean).join(', ').trim();
+    return full || 'Address unavailable';
+  }
+
   openProfile(): void {
-    console.log('Open profile clicked');
     this.router.navigate(['/resident/profile']);
   }
 
   openApartment(): void {
-    console.log('Open apartment clicked');
     this.router.navigate(['/resident/profile']);
   }
 
   openInvoices(): void {
-    console.log('Open invoices clicked');
     this.router.navigate(['/resident/invoices']);
   }
 

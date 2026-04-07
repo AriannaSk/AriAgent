@@ -39,8 +39,13 @@
 
       <div class="welcome-stats">
         <div class="mini-stat">
-          <span class="mini-stat-label">Apartment</span>
-          <strong>{{ apartment()?.numurs ? ('#' + apartment()?.numurs) : '—' }}</strong>
+          <span class="mini-stat-label">Apartments</span>
+          <strong>{{ apartments().length }}</strong>
+        </div>
+
+        <div class="mini-stat">
+          <span class="mini-stat-label">Apartment list</span>
+          <strong>{{ apartmentNumbersText() || '—' }}</strong>
         </div>
 
         <div class="mini-stat">
@@ -72,73 +77,69 @@
             <span class="info-value">{{ residentPhone() }}</span>
           </div>
         </div>
+
         <div class="info-row">
           <span class="info-label">Personal Code</span>
           <span class="info-value">{{ residentPersonalCode() }}</span>
         </div>
 
         <div class="card-actions">
-        <button type="button" class="btn-secondary" (click)="openProfile()">
-          Edit profile
-        </button>
-      </div>
+          <button type="button" class="btn-secondary" (click)="openProfile()">
+            Edit profile
+          </button>
+        </div>
       </article>
 
-      <article class="dashboard-card">
-        <div class="card-top">
-          <div class="card-icon apartment-icon">
-            <i class="bi bi-building"></i>
-          </div>
-          <span class="card-tag">Apartment</span>
-        </div>
-
-        <h3 class="card-title">
-          Apartment {{ apartment()?.numurs ? ('#' + apartment()?.numurs) : '—' }}
-        </h3>
-
-        <div class="info-list" *ngIf="apartment() as ap; else noApartment">
-          <div class="info-row">
-            <span class="info-label">Floor</span>
-            <span class="info-value">{{ ap.stavs }}</span>
+      <ng-container *ngFor="let ap of apartments()">
+        <article class="dashboard-card">
+          <div class="card-top">
+            <div class="card-icon apartment-icon">
+              <i class="bi bi-building"></i>
+            </div>
+            <span class="card-tag">Apartment</span>
           </div>
 
-          <div class="info-row">
-            <span class="info-label">Rooms</span>
-            <span class="info-value">{{ ap.istabuSkaits }}</span>
+          <h3 class="card-title">
+            Apartment {{ ap.numurs ? ('#' + ap.numurs) : '—' }}
+          </h3>
+
+          <div class="info-list">
+            <div class="info-row">
+              <span class="info-label">Floor</span>
+              <span class="info-value">{{ ap.stavs }}</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Rooms</span>
+              <span class="info-value">{{ ap.istabuSkaits }}</span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Area</span>
+              <span class="info-value">
+                {{ ap.pilnaPlatiba != null ? (ap.pilnaPlatiba + ' m²') : '—' }}
+              </span>
+            </div>
+
+            <div class="info-row">
+              <span class="info-label">Address</span>
+              <span class="info-value address-value">
+                {{ houseAddress(ap) }}
+              </span>
+            </div>
           </div>
 
-          <div class="info-row">
-            <span class="info-label">Area</span>
-            <span class="info-value">
-              {{ ap.pilnaPlatiba != null ? (ap.pilnaPlatiba + ' m²') : '—' }}
-            </span>
+          <div class="card-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="openApartment()"
+            >
+              View apartment
+            </button>
           </div>
-
-          <div class="info-row">
-            <span class="info-label">Address</span>
-            <span class="info-value address-value">
-              {{ houseAddress() || 'Address unavailable' }}
-            </span>
-          </div>
-        </div>
-
-        <ng-template #noApartment>
-          <div class="empty-mini">
-            No apartment linked to your account.
-          </div>
-        </ng-template>
-
-        <div class="card-actions">
-        <button
-          type="button"
-          class="btn-secondary"
-          (click)="openApartment()"
-          [disabled]="!apartment()"
-        >
-          View apartment
-        </button>
-      </div>
-      </article>
+        </article>
+      </ng-container>
 
       <article class="dashboard-card">
         <div class="card-top">
@@ -174,12 +175,11 @@
         </div>
 
         <div class="card-actions">
-          <button class="btn-primary" (click)="openInvoices()">
+          <button type="button" class="btn-primary" (click)="openInvoices()">
             Open invoices
           </button>
         </div>
       </article>
     </section>
-
   </ng-container>
 </div>

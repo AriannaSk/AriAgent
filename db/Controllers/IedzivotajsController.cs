@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using db.DTOs;
 using db.Models;
 using db.Services.Interfaces;
@@ -98,9 +98,44 @@ public class IedzivotajsController : ControllerBase
             });
         }
     }
+  // CREATE account for existing resident
+  [Authorize(Roles = "Manager")]
+  [HttpPost("{id}/create-account")]
+  public async Task<IActionResult> CreateAccountForExistingResident(Guid id, [FromBody] ResidentExistingAccountCreateDto dto)
+  {
+    try
+    {
+      if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
-    // UPDATE resident
-    [Authorize(Roles = "Manager,Resident")]
+      if (id != dto.ResidentId)
+        return BadRequest("Id mismatch");
+
+      var ok = await _service.CreateAccountForExistingResidentAsync(dto);
+
+      if (!ok)
+        return BadRequest(new
+        {
+          message = "Failed to create account for resident."
+        });
+
+      return Ok(new
+      {
+        message = "Account created successfully."
+      });
+    }
+    catch (Exception ex)
+    {
+      return BadRequest(new
+      {
+        message = ex.Message,
+        inner = ex.InnerException?.Message
+      });
+    }
+  }
+
+  // UPDATE resident
+  [Authorize(Roles = "Manager,Resident")]
     [HttpPut("{id}")]
     public async Task<IActionResult> PutIedzivotajs(Guid id, IedzivotajsUpdateDto dto)
     {
