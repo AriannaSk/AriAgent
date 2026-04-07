@@ -2,6 +2,8 @@
   max-width: 1040px;
   margin: 36px auto;
   padding: 0 18px 24px;
+  min-height: 100vh;
+  color: var(--text);
 }
 
 .page-header {
@@ -23,27 +25,32 @@
 
 .page-subtitle {
   margin: 8px 0 0;
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 15px;
+  line-height: 1.5;
 }
 
 .back-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  min-height: 44px;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--surface);
   color: var(--text);
   border-radius: 14px;
   padding: 10px 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 .back-btn:hover {
-  background: #f8fafc;
-  border-color: #93c5fd;
+  background: var(--surface-soft);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
 }
 
 .back-btn i {
@@ -52,16 +59,24 @@
 
 .state-card,
 .message-card {
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 14px 16px;
   margin-bottom: 18px;
   font-weight: 500;
 }
 
 .state-card {
-  background: rgba(255, 255, 255, 0.75);
+  background: var(--surface);
   border: 1px solid var(--border);
-  color: var(--muted);
+  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+}
+
+.message-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
 }
 
 .error-message {
@@ -77,11 +92,16 @@
 }
 
 .profile-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 26px;
   padding: 28px;
-  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.06);
+  box-shadow: var(--shadow-md);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.profile-card:hover {
+  border-color: var(--border-strong);
 }
 
 .profile-card-header {
@@ -102,6 +122,7 @@
   color: white;
   font-size: 26px;
   flex-shrink: 0;
+  box-shadow: 0 10px 24px rgba(99, 102, 241, 0.22);
 }
 
 .profile-card-title {
@@ -110,18 +131,24 @@
   font-weight: 800;
   color: var(--text);
   letter-spacing: -0.5px;
+  word-break: break-word;
 }
 
 .profile-card-subtitle {
   margin: 6px 0 0;
-  color: var(--muted);
+  color: var(--text-muted);
   font-size: 14px;
+  line-height: 1.5;
 }
 
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px 18px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
 }
 
 .form-group {
@@ -133,36 +160,40 @@
   margin-bottom: 8px;
   font-size: 14px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--text-soft);
 }
 
 .form-input {
   height: 50px;
   border-radius: 14px;
-  border: 1px solid #dbe3ef;
-  background: #f8fbff;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-soft);
   padding: 0 14px;
   font-size: 15px;
   color: var(--text);
   outline: none;
-  transition: 0.2s ease;
+  transition: all 0.2s ease;
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
 }
 
 .form-input:focus {
-  border-color: #4f7cff;
-  background: white;
-  box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.12);
+  border-color: var(--primary);
+  background: var(--surface);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
 .form-input.invalid {
   border-color: #ef4444;
-  background: #fff8f8;
+  background: rgba(239, 68, 68, 0.04);
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.08);
 }
 
 .readonly-input {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--surface-muted);
+  color: var(--text-soft);
 }
 
 .field-error {
@@ -182,9 +213,11 @@
 .save-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  min-height: 46px;
   border: none;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
   color: white;
   border-radius: 15px;
   padding: 13px 20px;
@@ -206,8 +239,12 @@
 }
 
 .cancel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
   border: 1px solid var(--border);
-  background: white;
+  background: var(--surface);
   color: var(--text);
   border-radius: 15px;
   padding: 13px 18px;
@@ -218,12 +255,114 @@
 }
 
 .cancel-btn:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--surface-soft);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
 }
+
 .apartment-card {
   margin-top: 32px;
 }
+
+/* =========================
+   DARK THEME
+========================= */
+
+body.dark-theme .resident-page {
+  background: transparent;
+}
+
+body.dark-theme .back-btn {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-soft);
+}
+
+body.dark-theme .back-btn:hover {
+  background: var(--surface-soft);
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+body.dark-theme .state-card,
+body.dark-theme .message-card,
+body.dark-theme .profile-card {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+
+body.dark-theme .profile-card {
+  box-shadow: var(--shadow-md);
+}
+
+body.dark-theme .profile-card-subtitle,
+body.dark-theme .page-subtitle {
+  color: var(--text-muted);
+}
+
+body.dark-theme .form-label {
+  color: var(--text-soft);
+}
+
+body.dark-theme .form-input {
+  background: #243247;
+  border-color: #3f5472;
+  color: var(--text);
+}
+
+body.dark-theme .form-input::placeholder {
+  color: var(--text-muted);
+}
+
+body.dark-theme .form-input:focus {
+  background: #283850;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16);
+}
+
+body.dark-theme .form-input.invalid {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+}
+
+body.dark-theme .readonly-input {
+  background: #202d42;
+  color: var(--text-soft);
+}
+
+body.dark-theme .cancel-btn {
+  background: transparent;
+  color: var(--text-soft);
+  border-color: #526781;
+}
+
+body.dark-theme .cancel-btn:hover {
+  background: #243247;
+  color: var(--text);
+  border-color: #6480a1;
+}
+
+body.dark-theme .error-message {
+  background: rgba(239, 68, 68, 0.14);
+  border-color: rgba(239, 68, 68, 0.26);
+  color: #fca5a5;
+}
+
+body.dark-theme .success-message {
+  background: rgba(34, 197, 94, 0.14);
+  border-color: rgba(34, 197, 94, 0.26);
+  color: #6ee7b7;
+}
+
+body.dark-theme .profile-icon {
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media (max-width: 768px) {
   .resident-page {
@@ -245,7 +384,6 @@
 
   .back-btn {
     width: 100%;
-    justify-content: center;
   }
 
   .form-actions {
@@ -255,6 +393,25 @@
   .save-btn,
   .cancel-btn {
     width: 100%;
-    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 28px;
+  }
+
+  .profile-card-title {
+    font-size: 24px;
+  }
+
+  .profile-card-header {
+    align-items: flex-start;
+  }
+
+  .profile-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
   }
 }

@@ -33,7 +33,8 @@
         <span class="welcome-badge">Overview</span>
         <h2>Welcome back, {{ residentFullName() }} 👋</h2>
         <p>
-          Here you can review your apartment details, personal information and recent invoices.
+          Here you can review your apartment details, personal information and
+          recent invoices.
         </p>
       </div>
 
@@ -78,13 +79,17 @@
           </div>
         </div>
 
-        <div class="info-row">
+        <div class="info-row single-info-row">
           <span class="info-label">Personal Code</span>
           <span class="info-value">{{ residentPersonalCode() }}</span>
         </div>
 
         <div class="card-actions">
-          <button type="button" class="btn-secondary" (click)="openProfile()">
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="openProfile()"
+          >
             Edit profile
           </button>
         </div>
@@ -132,7 +137,7 @@
           <div class="card-actions">
             <button
               type="button"
-              class="btn-secondary"
+              class="btn btn-outline-secondary"
               (click)="openApartment()"
             >
               View apartment
@@ -150,14 +155,16 @@
         </div>
 
         <h3 class="card-title">
-          {{ unpaidInvoicesCount() }} unpaid invoice{{ unpaidInvoicesCount() === 1 ? '' : 's' }}
+          {{ unpaidInvoicesCount() }} unpaid invoice{{ unpaidInvoicesCount() ===
+          1 ? '' : 's' }}
         </h3>
 
         <div class="info-list">
           <div class="info-row">
             <span class="info-label">Latest amount</span>
             <span class="info-value">
-              {{ latestInvoice()?.total != null ? (latestInvoice()?.total + ' €') : '0.00 €' }}
+              {{ latestInvoice()?.total != null ? (latestInvoice()?.total + ' €')
+              : '0.00 €' }}
             </span>
           </div>
 
@@ -168,14 +175,22 @@
 
           <div class="info-row">
             <span class="info-label">Status</span>
-            <span class="status-badge" [class.paid]="unpaidInvoicesCount() === 0">
-              {{ unpaidInvoicesCount() > 0 ? 'Requires attention' : 'All paid' }}
+            <span
+              class="status-badge"
+              [class.paid]="unpaidInvoicesCount() === 0"
+            >
+              {{ unpaidInvoicesCount() > 0 ? 'Requires attention' : 'All paid'
+              }}
             </span>
           </div>
         </div>
 
         <div class="card-actions">
-          <button type="button" class="btn-primary" (click)="openInvoices()">
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="openInvoices()"
+          >
             Open invoices
           </button>
         </div>
