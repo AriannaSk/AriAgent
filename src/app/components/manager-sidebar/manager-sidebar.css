@@ -22,12 +22,6 @@
 
 .sidebar-logo i {
   font-size: 40px;
-  flex-shrink: 0;
-}
-
-.logo-text {
-  display: inline-block;
-  white-space: nowrap;
 }
 
 /* MENU */
@@ -55,7 +49,6 @@
 .sidebar-menu a i {
   width: 22px;
   font-size: 18px;
-  flex-shrink: 0;
 }
 
 .sidebar-menu a:hover,
@@ -64,12 +57,82 @@
   transform: translateX(2px);
 }
 
-.menu-text {
-  display: inline-block;
-  white-space: nowrap;
+/* SETTINGS */
+.sidebar-settings {
+  margin-top: 8px;
+  padding: 10px 10px 0;
 }
 
-/* SETTINGS */
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: white;
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.settings-label {
+  opacity: 0.95;
+  font-weight: 600;
+}
+
+.theme-toggle {
+  width: 54px;
+  height: 30px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.22s ease;
+}
+
+.toggle-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transform: translateX(0);
+  transition: transform 0.22s ease;
+}
+
+:host-context(.dark) .toggle-circle {
+  transform: translateX(24px);
+}
+
+/* BOTTOM */
+.sidebar-bottom {
+  margin-top: auto;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+/* LOGOUT */
+.logout-btn {
+  width: 100%;
+  border: none;
+  border-radius: 14px;
+  background: #ef5350;
+  color: white;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.22s ease;
+}
+
+.logout-btn:hover {
+  background: #e24845;
+  transform: translateY(-1px);
+}
 .sidebar-settings {
   margin-top: 8px;
   padding: 10px 10px 0;
@@ -103,14 +166,17 @@
   transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
+/* светлая тема */
 .theme-toggle.light {
   background: rgba(255, 255, 255, 0.28);
 }
 
+/* тёмная тема */
 .theme-toggle.dark {
   background: rgba(15, 23, 42, 0.55);
 }
 
+/* кружок */
 .toggle-circle {
   width: 22px;
   height: 22px;
@@ -124,112 +190,24 @@
   transition: transform 0.25s ease, background 0.25s ease;
 }
 
+/* иконка внутри */
 .toggle-circle span {
   line-height: 1;
 }
 
+/* положение кружка в светлой теме */
 .theme-toggle.light .toggle-circle {
   transform: translateX(0);
   background: #fff7d6;
 }
 
+/* положение кружка в тёмной теме */
 .theme-toggle.dark .toggle-circle {
   transform: translateX(28px);
   background: #1e293b;
 }
 
+/* hover */
 .theme-toggle:hover {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
-}
-
-/* BOTTOM */
-.sidebar-bottom {
-  margin-top: auto;
-  padding-top: 22px;
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-}
-
-/* LOGOUT */
-.logout-btn {
-  width: 100%;
-  border: none;
-  border-radius: 14px;
-  background: #ef5350;
-  color: white;
-  padding: 14px;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.22s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.logout-btn:hover {
-  background: #e24845;
-  transform: translateY(-1px);
-}
-
-.logout-text {
-  display: inline-block;
-  white-space: nowrap;
-}
-
-/* TABLET */
-@media (max-width: 992px) {
-  .sidebar-logo {
-    font-size: 24px;
-  }
-
-  .sidebar-logo i {
-    font-size: 32px;
-  }
-
-  .sidebar-menu a {
-    font-size: 16px;
-    padding: 12px;
-  }
-
-  .settings-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-/* MOBILE / NARROW SIDEBAR */
-@media (max-width: 768px) {
-  .logo-text,
-  .menu-text,
-  .settings-label,
-  .logout-text {
-    display: none;
-  }
-
-  .sidebar-logo {
-    justify-content: center;
-    padding: 8px 0 12px;
-  }
-
-  .sidebar-menu a {
-    justify-content: center;
-    padding: 12px 10px;
-  }
-
-  .sidebar-menu a i {
-    width: auto;
-    font-size: 20px;
-  }
-
-  .sidebar-settings {
-    padding: 10px 0 0;
-  }
-
-  .settings-item {
-    align-items: center;
-  }
-
-  .logout-btn {
-    padding: 12px;
-  }
 }

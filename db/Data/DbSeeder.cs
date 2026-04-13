@@ -1,4 +1,4 @@
-﻿using db.Models;
+using db.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace db.Data;
@@ -50,7 +50,7 @@ public static class DbSeeder
             IedzivotajuSkaits = 2,
             PilnaPlatiba = 48.5,
             DzivojamaPlatiba = 34,
-            LodzijasPlatiba = 2,
+            LodzijasPlatiba = 0,
             MajaId = maja1.Id
         };
 
@@ -76,7 +76,7 @@ public static class DbSeeder
             IedzivotajuSkaits = 1,
             PilnaPlatiba = 28,
             DzivojamaPlatiba = 18,
-            LodzijasPlatiba = 1,
+            LodzijasPlatiba = 0,
             MajaId = maja2.Id
         };
 
@@ -89,7 +89,7 @@ public static class DbSeeder
             IedzivotajuSkaits = 0,
             PilnaPlatiba = 55,
             DzivojamaPlatiba = 38,
-            LodzijasPlatiba = 3,
+            LodzijasPlatiba = 0,
             MajaId = maja2.Id
         };
 
@@ -102,7 +102,7 @@ public static class DbSeeder
             IedzivotajuSkaits = 1,
             PilnaPlatiba = 90,
             DzivojamaPlatiba = 65,
-            LodzijasPlatiba = 5,
+            LodzijasPlatiba = 0,
             MajaId = maja1.Id
         };
 
